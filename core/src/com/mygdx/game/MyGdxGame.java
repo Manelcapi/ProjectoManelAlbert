@@ -83,13 +83,21 @@ public class MyGdxGame extends ApplicationAdapter {
 	public void handleInput(float dt) {
 		if(player != null){
 			if(Gdx.input.isKeyPressed(Input.Keys.LEFT)){
-				player.setPosition(player.getX()+(-200*dt),player.getY());
+				if(player.getX() > 0){
+					player.setPosition(player.getX()+(-200*dt),player.getY());
+				}
 			}else if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)){
-				player.setPosition(player.getX()+(+200*dt),player.getY());
+				if(player.getX() < 600){
+					player.setPosition(player.getX()+(+200*dt),player.getY());
+				}
 			}else if(Gdx.input.isKeyPressed(Input.Keys.UP)){
-				player.setPosition(player.getX(),player.getY()+(+200*dt));
+				if(player.getY() < 440){
+					player.setPosition(player.getX(),player.getY()+(+200*dt));
+				}
 			}else if(Gdx.input.isKeyPressed(Input.Keys.DOWN)){
-				player.setPosition(player.getX(),player.getY()+(-200*dt));
+				if(player.getY() > 0){
+					player.setPosition(player.getX(),player.getY()+(-200*dt));
+				}
 			}
 		}
 	}
@@ -103,12 +111,14 @@ public class MyGdxGame extends ApplicationAdapter {
 	}
 	public void connectSocket(){
 		try {
-			socket = IO.socket("http://192.168.2.88:8080");
+			socket = IO.socket("http://localhost:8080");
 			socket.connect();
 		}catch (Exception e){
 			System.out.print(e);
 		}
 	}
+
+
 	public void configSocketEvents() {
 		socket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
 			@Override
