@@ -5,7 +5,9 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 
 import org.json.JSONArray;
@@ -32,19 +34,12 @@ public class MyGdxGame extends ApplicationAdapter {
 	String id;
 	Texture friendPlayer;
 	Texture mainPlayer;
-	Texture mainPlayerStep1;
-	Texture mainPlayerStep2;
 	Texture mainPlayerLeft;
-	Texture mainPlayerLeftStep1;
-	Texture mainPlayerLeftStep2;
 	Texture mainPlayerRight;
-	Texture mainPlayerRightStep1;
-	Texture mainPlayerRightStep2;
 	Texture mainPlayerTop;
-	Texture mainPlayerTopStep1;
-	Texture mainPlayerTopStep2;
-	Boolean step1 = true;
-	Boolean step2 = false;
+	Texture img;
+	TextureRegion animationFrames;
+	Animation animation;
 	private Socket socket;
 	Texture[] arrayLeft = new Texture[5];
 	Map<String,Player> friendlyPlayers;
@@ -53,19 +48,12 @@ public class MyGdxGame extends ApplicationAdapter {
 	public void create () {
 		batch = new SpriteBatch();
 		mainPlayer = new Texture("ninja1.png");
-		mainPlayerStep1 = new Texture("ninja1DownStep1.png");
-		mainPlayerStep2 = new Texture("ninja1DownStep2.png");
 		mainPlayerLeft = new Texture("ninja1Left.png");
-		mainPlayerLeftStep1 = new Texture("ninja1LeftStep1.png");
-		mainPlayerLeftStep2 = new Texture("ninja1LeftStep2.png");
 		mainPlayerRight = new Texture("ninja1Right.png");
-		mainPlayerRightStep1 = new Texture("ninja1RightStep1.png");
-		mainPlayerRightStep2 = new Texture("ninja1RightStep2.png");
 		mainPlayerTop = new Texture("ninja1Top.png");
-		mainPlayerTopStep1 = new Texture("ninja1TopStep1.png");
-		mainPlayerTopStep2 = new Texture("ninja1TopStep2.png");
 		friendPlayer = new Texture("ninja2.png");
-		arrayLeft = new Texture[]{mainPlayerLeft, mainPlayerLeftStep1, mainPlayerLeft, mainPlayerLeftStep2, mainPlayerLeft};
+		img = new Texture("ninja1move.png");
+
 		friendlyPlayers = new HashMap<String, Player>();
 		connectSocket();
 		configSocketEvents();
@@ -126,50 +114,17 @@ public class MyGdxGame extends ApplicationAdapter {
 			}else if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)){
 				player.setTexture(mainPlayerRight);
 				if(player.getX() < 600){
-					if(step1) {
-						player.setTexture(mainPlayerRightStep1);
-						step1 = false;
-						step2 = true;
-					}
-					else if(step2) {
-						player.setTexture(mainPlayerRightStep2);
-						step1 = true;
-						step2 = false;
-					}
 					player.setPosition(player.getX()+(+200*dt),player.getY());
-
 				}
 			}else if(Gdx.input.isKeyPressed(Input.Keys.UP)){
 				player.setTexture(mainPlayerTop);
 				if(player.getY() < 440){
-					if(step1) {
-						player.setTexture(mainPlayerTopStep1);
-						step1 = false;
-						step2 = true;
-					}
-					else if(step2) {
-						player.setTexture(mainPlayerTopStep2);
-						step1 = true;
-						step2 = false;
-					}
 					player.setPosition(player.getX(), player.getY() + (+200 * dt));
-
 				}
 			}else if(Gdx.input.isKeyPressed(Input.Keys.DOWN)){
 				player.setTexture(mainPlayer);
 				if(player.getY() > 0){
-					if(step1) {
-						player.setTexture(mainPlayerStep1);
-						step1 = false;
-						step2 = true;
-					}
-					else if(step2) {
-						player.setTexture(mainPlayerStep2);
-						step1 = true;
-						step2 = false;
-					}
 					player.setPosition(player.getX(),player.getY()+(-200*dt));
-
 				}
 
 
