@@ -16,6 +16,7 @@ import org.json.JSONObject;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.concurrent.TimeUnit;
 
 
 import io.socket.client.IO;
@@ -31,14 +32,40 @@ public class MyGdxGame extends ApplicationAdapter {
 	String id;
 	Texture friendPlayer;
 	Texture mainPlayer;
+	Texture mainPlayerStep1;
+	Texture mainPlayerStep2;
+	Texture mainPlayerLeft;
+	Texture mainPlayerLeftStep1;
+	Texture mainPlayerLeftStep2;
+	Texture mainPlayerRight;
+	Texture mainPlayerRightStep1;
+	Texture mainPlayerRightStep2;
+	Texture mainPlayerTop;
+	Texture mainPlayerTopStep1;
+	Texture mainPlayerTopStep2;
+	Boolean step1 = true;
+	Boolean step2 = false;
 	private Socket socket;
+	Texture[] arrayLeft = new Texture[5];
 	Map<String,Player> friendlyPlayers;
 
 	@Override
 	public void create () {
 		batch = new SpriteBatch();
-		friendPlayer = new Texture("ninja2.png");
 		mainPlayer = new Texture("ninja1.png");
+		mainPlayerStep1 = new Texture("ninja1DownStep1.png");
+		mainPlayerStep2 = new Texture("ninja1DownStep2.png");
+		mainPlayerLeft = new Texture("ninja1Left.png");
+		mainPlayerLeftStep1 = new Texture("ninja1LeftStep1.png");
+		mainPlayerLeftStep2 = new Texture("ninja1LeftStep2.png");
+		mainPlayerRight = new Texture("ninja1Right.png");
+		mainPlayerRightStep1 = new Texture("ninja1RightStep1.png");
+		mainPlayerRightStep2 = new Texture("ninja1RightStep2.png");
+		mainPlayerTop = new Texture("ninja1Top.png");
+		mainPlayerTopStep1 = new Texture("ninja1TopStep1.png");
+		mainPlayerTopStep2 = new Texture("ninja1TopStep2.png");
+		friendPlayer = new Texture("ninja2.png");
+		arrayLeft = new Texture[]{mainPlayerLeft, mainPlayerLeftStep1, mainPlayerLeft, mainPlayerLeftStep2, mainPlayerLeft};
 		friendlyPlayers = new HashMap<String, Player>();
 		connectSocket();
 		configSocketEvents();
@@ -56,6 +83,7 @@ public class MyGdxGame extends ApplicationAdapter {
 			try {
 				data.put("x",player.getX());
 				data.put("y",player.getY());
+				data.put("texture",player.getTexture());
 				socket.emit("playerMoved",data);
 
 			}catch (JSONException e){
@@ -66,38 +94,86 @@ public class MyGdxGame extends ApplicationAdapter {
 
 	@Override
 	public void render () {
-		Gdx.gl.glClearColor(0, 0, 0, 1);
-		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-		handleInput(Gdx.graphics.getDeltaTime());
-		updateServer(Gdx.graphics.getDeltaTime());
-		batch.begin();
-		if(player != null){
-			player.draw(batch);
+		try {
+			Gdx.gl.glClearColor(0, 0, 0, 1);
+			Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+			handleInput(Gdx.graphics.getDeltaTime());
+			updateServer(Gdx.graphics.getDeltaTime());
+			batch.begin();
+			if(player != null){
+				player.draw(batch);
+			}
+			for(Map.Entry<String,Player> entry : friendlyPlayers.entrySet()){
+				entry.getValue().draw(batch);
+			}
+			batch.end();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
 		}
-		for(Map.Entry<String,Player> entry : friendlyPlayers.entrySet()){
-			entry.getValue().draw(batch);
-		}
-		batch.end();
+
 	}
 
-	public void handleInput(float dt) {
+	public void handleInput(float dt) throws InterruptedException {
 		if(player != null){
 			if(Gdx.input.isKeyPressed(Input.Keys.LEFT)){
+				player.setTexture(mainPlayerLeft);
 				if(player.getX() > 0){
+					for (int i = 0; i > arrayLeft.length; i++) {
+						player.setTexture(arrayLeft[i]);
+					}
 					player.setPosition(player.getX()+(-200*dt),player.getY());
+
 				}
 			}else if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)){
+				player.setTexture(mainPlayerRight);
 				if(player.getX() < 600){
+					if(step1) {
+						player.setTexture(mainPlayerRightStep1);
+						step1 = false;
+						step2 = true;
+					}
+					else if(step2) {
+						player.setTexture(mainPlayerRightStep2);
+						step1 = true;
+						step2 = false;
+					}
 					player.setPosition(player.getX()+(+200*dt),player.getY());
+
 				}
 			}else if(Gdx.input.isKeyPressed(Input.Keys.UP)){
+				player.setTexture(mainPlayerTop);
 				if(player.getY() < 440){
-					player.setPosition(player.getX(),player.getY()+(+200*dt));
+					if(step1) {
+						player.setTexture(mainPlayerTopStep1);
+						step1 = false;
+						step2 = true;
+					}
+					else if(step2) {
+						player.setTexture(mainPlayerTopStep2);
+						step1 = true;
+						step2 = false;
+					}
+					player.setPosition(player.getX(), player.getY() + (+200 * dt));
+
 				}
 			}else if(Gdx.input.isKeyPressed(Input.Keys.DOWN)){
+				player.setTexture(mainPlayer);
 				if(player.getY() > 0){
+					if(step1) {
+						player.setTexture(mainPlayerStep1);
+						step1 = false;
+						step2 = true;
+					}
+					else if(step2) {
+						player.setTexture(mainPlayerStep2);
+						step1 = true;
+						step2 = false;
+					}
 					player.setPosition(player.getX(),player.getY()+(-200*dt));
+
 				}
+
+
 			}
 		}
 	}
@@ -111,7 +187,7 @@ public class MyGdxGame extends ApplicationAdapter {
 	}
 	public void connectSocket(){
 		try {
-			socket = IO.socket("http://192.168.2.88:8080");
+			socket = IO.socket("http://192.168.2.248:8080");
 			socket.connect();
 		}catch (Exception e){
 			System.out.print(e);
@@ -132,8 +208,8 @@ public class MyGdxGame extends ApplicationAdapter {
 				JSONObject data = (JSONObject) args[0];
 				try {
 
-				id = data.getString("id");
-				Gdx.app.log("SocketID","My ID: "+id);
+					id = data.getString("id");
+					Gdx.app.log("SocketID","My ID: "+id);
 				}catch (JSONException e){
 					Gdx.app.log("SocketID","Error Estableciendo ID");
 				}

@@ -28,6 +28,7 @@ io.on('connection', function(socket){
 	        if(players[i].id== data.id){
 	            players[i].x = data.x;
 	            players[i].y = data.y;
+	            players[i].texture = data.texture;
 	        }
 	    }
 	});
