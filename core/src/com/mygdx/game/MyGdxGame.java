@@ -16,14 +16,19 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Iterator;
+
 
 import Scenes.Hud;
-import animation.Move;
 import io.socket.client.IO;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
+import sprites.Bullet;
 import sprites.Player;
 
 public class MyGdxGame extends ApplicationAdapter {
@@ -44,6 +49,7 @@ public class MyGdxGame extends ApplicationAdapter {
 	public static Sprite backgroundSprite;
 	private Socket socket;
 	Map<String,Player> friendlyPlayers;
+	ArrayList<Bullet> bulletsList = new ArrayList<Bullet>();
 
 	@Override
 	public void create () {
@@ -103,7 +109,16 @@ public class MyGdxGame extends ApplicationAdapter {
 		for(Map.Entry<String,Player> entry : friendlyPlayers.entrySet()){
 			entry.getValue().draw(batch);
 		}
+		for (Bullet b : bulletsList){
+			b.draw(batch);
+		}
 		batch.end();
+		for (Bullet b : bulletsList){
+			b.update(Gdx.graphics.getDeltaTime());
+		}
+		if(Gdx.input.isKeyPressed(Input.Keys.SPACE)){
+			bulletsList.add(new Bullet((int)player.getX(),(int)player.getY(),90 * (float)(Math.PI / 2)));
+		}
 	}
 
 	public void handleInput(float dt) {
@@ -204,6 +219,7 @@ public class MyGdxGame extends ApplicationAdapter {
 						friendlyPlayers.get(playerId).setPosition(x.floatValue(),y.floatValue());
 						//friendlyPlayers.get(playerId).setTexture(texutraStep);
 					}
+
 				} catch (JSONException e) {
 
 				}
