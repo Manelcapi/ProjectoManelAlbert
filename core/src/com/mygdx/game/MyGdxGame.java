@@ -5,7 +5,9 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.FileTextureData;
 import com.badlogic.gdx.math.Vector2;
 
 import org.json.JSONArray;
@@ -13,6 +15,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -21,6 +24,7 @@ import java.util.Iterator;
 import io.socket.client.IO;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
+import sprites.Bullet;
 import sprites.Player;
 
 public class MyGdxGame extends ApplicationAdapter {
@@ -31,14 +35,19 @@ public class MyGdxGame extends ApplicationAdapter {
 	String id;
 	Texture friendPlayer;
 	Texture mainPlayer;
+	public static Texture backgroundTexture;
+	public static Sprite backgroundSprite;
 	private Socket socket;
 	Map<String,Player> friendlyPlayers;
+	ArrayList<Bullet> bulletsList = new ArrayList<Bullet>();
 
 	@Override
 	public void create () {
 		batch = new SpriteBatch();
 		friendPlayer = new Texture("ninja2.png");
 		mainPlayer = new Texture("ninja1.png");
+		backgroundTexture = new Texture("background.jpg");
+		backgroundSprite =new Sprite(backgroundTexture);
 		friendlyPlayers = new HashMap<String, Player>();
 		connectSocket();
 		configSocketEvents();
@@ -56,6 +65,8 @@ public class MyGdxGame extends ApplicationAdapter {
 			try {
 				data.put("x",player.getX());
 				data.put("y",player.getY());
+				String path = ((FileTextureData)player.getTexture().getTextureData()).getFileHandle().path();
+				data.put("texture",path);
 				socket.emit("playerMoved",data);
 
 			}catch (JSONException e){
@@ -63,27 +74,41 @@ public class MyGdxGame extends ApplicationAdapter {
 			}
 		}
 	}
+	public void renderBackground() {
+		backgroundSprite.draw(batch);
+	}
 
 	@Override
 	public void render () {
-		Gdx.gl.glClearColor(0, 0, 0, 1);
+		Gdx.gl.glActiveTexture(1);
+		//Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		handleInput(Gdx.graphics.getDeltaTime());
 		updateServer(Gdx.graphics.getDeltaTime());
 		batch.begin();
+		renderBackground();
 		if(player != null){
 			player.draw(batch);
 		}
 		for(Map.Entry<String,Player> entry : friendlyPlayers.entrySet()){
 			entry.getValue().draw(batch);
 		}
+		for (Bullet b : bulletsList){
+			b.draw(batch);
+		}
 		batch.end();
+		for (Bullet b : bulletsList){
+			b.update(Gdx.graphics.getDeltaTime());
+		}
+		if(Gdx.input.isKeyPressed(Input.Keys.SPACE)){
+			bulletsList.add(new Bullet((int)player.getX(),(int)player.getY(),90 * (float)(Math.PI / 180)));
+		}
 	}
 
 	public void handleInput(float dt) {
 		if(player != null){
 			if(Gdx.input.isKeyPressed(Input.Keys.LEFT)){
-				if(player.getX() > 0){
+				if(player.getX() > 30){
 					player.setPosition(player.getX()+(-200*dt),player.getY());
 				}
 			}else if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)){
@@ -95,7 +120,7 @@ public class MyGdxGame extends ApplicationAdapter {
 					player.setPosition(player.getX(),player.getY()+(+200*dt));
 				}
 			}else if(Gdx.input.isKeyPressed(Input.Keys.DOWN)){
-				if(player.getY() > 0){
+				if(player.getY() > 30){
 					player.setPosition(player.getX(),player.getY()+(-200*dt));
 				}
 			}
@@ -111,7 +136,7 @@ public class MyGdxGame extends ApplicationAdapter {
 	}
 	public void connectSocket(){
 		try {
-			socket = IO.socket("http://192.168.2.88:8080");
+			socket = IO.socket("http://192.168.2.248:8080");
 			socket.connect();
 		}catch (Exception e){
 			System.out.print(e);
@@ -171,10 +196,13 @@ public class MyGdxGame extends ApplicationAdapter {
 					String playerId = data.getString("id");
 					Double x = data.getDouble("x");
 					Double y = data.getDouble("y");
+					String texture = data.getString("texture");
+					//Texture texutraStep = new Texture(texture);
+					Gdx.app.log("SocketID","move: "+texture);
 					if(friendlyPlayers.get(playerId)!=null){
 						friendlyPlayers.get(playerId).setPosition(x.floatValue(),y.floatValue());
+						//friendlyPlayers.get(playerId).setTexture(texutraStep);
 					}
-
 				} catch (JSONException e) {
 
 				}
