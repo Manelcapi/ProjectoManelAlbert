@@ -101,7 +101,7 @@ public class MyGdxGame extends ApplicationAdapter {
 			b.update(Gdx.graphics.getDeltaTime());
 		}
 		if(Gdx.input.isKeyPressed(Input.Keys.SPACE)){
-			bulletsList.add(new Bullet((int)player.getX(),(int)player.getY(),90 * (float)(Math.PI / 180)));
+			bulletsList.add(new Bullet((int)player.getX(),(int)player.getY(),90 * (float)(Math.PI / 2)));
 		}
 	}
 
