@@ -43,6 +43,8 @@ public class MyGdxGame extends ApplicationAdapter {
 	SpriteBatch batch;
 	Player player;
 	String id;
+	int direccion;
+	int[] direcciones = {0,-1,1,90};
 	Texture friendPlayer;
 	Texture mainPlayer;
 	public static Texture backgroundTexture;
@@ -117,7 +119,7 @@ public class MyGdxGame extends ApplicationAdapter {
 			b.update(Gdx.graphics.getDeltaTime());
 		}
 		if(Gdx.input.isKeyPressed(Input.Keys.SPACE)){
-			bulletsList.add(new Bullet((int)player.getX(),(int)player.getY(),90 * (float)(Math.PI / 2)));
+			bulletsList.add(new Bullet((int)player.getX(),(int)player.getY(),direcciones[direccion]* (float)(Math.PI / 2)));
 		}
 	}
 
@@ -126,18 +128,24 @@ public class MyGdxGame extends ApplicationAdapter {
 			if(Gdx.input.isKeyPressed(Input.Keys.LEFT)){
 				if(player.getX() > 30){
 					player.setPosition(player.getX()+(-200*dt),player.getY());
+					direccion = 1;
 				}
 			}else if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)){
 				if(player.getX() < 600){
 					player.setPosition(player.getX()+(+200*dt),player.getY());
+					direccion = 2;
 				}
 			}else if(Gdx.input.isKeyPressed(Input.Keys.UP)){
 				if(player.getY() < 440){
 					player.setPosition(player.getX(),player.getY()+(+200*dt));
+					direccion = 0;
+
 				}
 			}else if(Gdx.input.isKeyPressed(Input.Keys.DOWN)){
 				if(player.getY() > 30){
 					player.setPosition(player.getX(),player.getY()+(-200*dt));
+					direccion = 3;
+
 				}
 			}
 		}
@@ -152,7 +160,7 @@ public class MyGdxGame extends ApplicationAdapter {
 	}
 	public void connectSocket(){
 		try {
-			socket = IO.socket("http://192.168.2.248:8080");
+			socket = IO.socket("http://localhost:8080");
 			socket.connect();
 		}catch (Exception e){
 			System.out.print(e);
