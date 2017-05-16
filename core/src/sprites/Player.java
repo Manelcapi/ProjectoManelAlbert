@@ -2,6 +2,7 @@ package sprites;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.Vector2;
 
 /**
@@ -9,6 +10,7 @@ import com.badlogic.gdx.math.Vector2;
  */
 
 public class Player extends Sprite{
+
     Vector2 previousPosition;
     public Player(Texture texture){
         super(texture);

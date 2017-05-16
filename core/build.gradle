@@ -12,4 +12,6 @@ eclipse.project {
 
 dependencies {
     compile 'com.mobidevelop.robovm:robovm-rt:2.3.0'
+    compile 'com.google.gwt:gwt-servlet:2.8.0'
+    compile 'com.google.gwt:gwt-servlet:2.8.0'
 }
