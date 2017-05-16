@@ -33,8 +33,6 @@ io.on('connection', function(socket){
 	    }
 	});
 
-
-
 	socket.on('disconnect', function(){
 		console.log("Jugador Desconectado");
 		socket.broadcast.emit('playerDisconnected',{id : socket.id});

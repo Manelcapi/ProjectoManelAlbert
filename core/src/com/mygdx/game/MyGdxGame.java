@@ -1,8 +1,10 @@
 package com.mygdx.game;
 
 import com.badlogic.gdx.ApplicationAdapter;
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -31,13 +33,13 @@ import io.socket.emitter.Emitter;
 import sprites.Bullet;
 import sprites.Player;
 
-public class MyGdxGame extends ApplicationAdapter {
+public class MyGdxGame extends Game implements Screen{
 	public static final int V_WIDTH = 700;
 	public static final int V_HEIGHT = 650;
-	private MyGdxGame game;
 	private OrthographicCamera gamecam;
 	private Viewport gamePort;
 	private Hud hud;
+	private boolean shoot = false;
 	private final float UPDATE_TIME = 1/60f;
 	float timer;
 	SpriteBatch batch;
@@ -69,8 +71,23 @@ public class MyGdxGame extends ApplicationAdapter {
 	}
 
 	@Override
+	public void show() {
+
+	}
+
+	@Override
+	public void render(float delta) {
+
+	}
+
+	@Override
 	public void resize(int width, int height) {
 		super.resize(width, height);
+	}
+
+	@Override
+	public void hide() {
+
 	}
 
 	public void updateServer(float dt){
@@ -83,6 +100,17 @@ public class MyGdxGame extends ApplicationAdapter {
 				String path = ((FileTextureData)player.getTexture().getTextureData()).getFileHandle().path();
 				data.put("texture",path);
 				socket.emit("playerMoved",data);
+
+			}catch (JSONException e){
+				Gdx.app.log("SOCKET.IO","Error enviando datos de recarga");
+			}
+		}
+		if(timer > UPDATE_TIME && player != null && shoot){
+			JSONObject data = new JSONObject();
+			try {
+				data.put("x",player.getX());
+				data.put("y",player.getY());
+				socket.emit("playerShoot",data);
 
 			}catch (JSONException e){
 				Gdx.app.log("SOCKET.IO","Error enviando datos de recarga");
@@ -102,9 +130,10 @@ public class MyGdxGame extends ApplicationAdapter {
 		updateServer(Gdx.graphics.getDeltaTime());
 		this.batch.setProjectionMatrix(hud.stage.getCamera().combined);
 		hud.stage.draw();
+		hud.update(Gdx.graphics.getDeltaTime());
 		batch.begin();
 
-		renderBackground();
+		//renderBackground();
 		if(player != null){
 			player.draw(batch);
 		}
@@ -118,9 +147,7 @@ public class MyGdxGame extends ApplicationAdapter {
 		for (Bullet b : bulletsList){
 			b.update(Gdx.graphics.getDeltaTime());
 		}
-		if(Gdx.input.isKeyPressed(Input.Keys.SPACE)){
-			bulletsList.add(new Bullet((int)player.getX(),(int)player.getY(),direcciones[direccion]* (float)(Math.PI / 2)));
-		}
+
 	}
 
 	public void handleInput(float dt) {
@@ -147,7 +174,11 @@ public class MyGdxGame extends ApplicationAdapter {
 					direccion = 3;
 
 				}
+			}if(Gdx.input.isKeyJustPressed(Input.Keys.SPACE)){
+				bulletsList.add(new Bullet((int)player.getX(),(int)player.getY(),direcciones[direccion]* (float)(Math.PI / 2)));
+				shoot = true;
 			}
+			shoot = false;
 		}
 	}
 
@@ -243,10 +274,28 @@ public class MyGdxGame extends ApplicationAdapter {
 						position.x = ((Double) objects.getJSONObject(i).getDouble("x")).floatValue();
 						position.y = ((Double) objects.getJSONObject(i).getDouble("y")).floatValue();
 						coopPlayer.setPosition(position.x, position.y);
-
 						friendlyPlayers.put(objects.getJSONObject(i).getString("id"), coopPlayer);
 					}
 				} catch(JSONException e){
+
+				}
+			}
+		}).on("playerShoot" ,new Emitter.Listener(){
+			@Override
+			public void call(Object... args) {
+				JSONObject data = (JSONObject) args[0];
+				try {
+					String playerId = data.getString("id");
+					Double x = data.getDouble("x");
+					Double y = data.getDouble("y");
+					//Texture texutraStep = new Texture(texture);
+					Gdx.app.log("SocketID","shoot: "+playerId);
+					if(friendlyPlayers.get(playerId)!=null){
+						friendlyPlayers.get(playerId).setPosition(x.floatValue(),y.floatValue());
+						//friendlyPlayers.get(playerId).setTexture(texutraStep);
+					}
+
+				} catch (JSONException e) {
 
 				}
 			}
