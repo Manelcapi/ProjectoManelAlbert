@@ -24,8 +24,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import Connection.Connection;
 import Scenes.Hud;
-import io.socket.client.IO;
 import io.socket.emitter.Emitter;
 import io.socket.client.Socket;
 import sprites.Bullet;
@@ -41,8 +41,11 @@ public class PlayScreen implements Screen{
     private OrthographicCamera gamecam;
     private Viewport gamePort;
     private Hud hud;
+    private boolean disparo;
     private final float UPDATE_TIME = 1/60f;
     private TmxMapLoader maploader;
+    private int[] direcciones = {0,1,-1,90};
+    private int direccion;
     private TiledMap map;
     private OrthogonalTiledMapRenderer renderer;
     float timer;
@@ -51,16 +54,22 @@ public class PlayScreen implements Screen{
     String id;
     Texture friendPlayer;
     Texture mainPlayer;
+    Texture bullet;
     Map<String, Player> friendlyPlayers;
+    Map<String,Bullet> bulletsPlayers;
     ArrayList<Bullet> bulletsList = new ArrayList<Bullet>();
     private Socket socket;
     public PlayScreen(MyGdxGame game){
+        //Creando conexion
+         Connection conection = new Connection();
+
 
         //Creacion jugadores
         batch = new SpriteBatch();
         friendPlayer = new Texture("ninja2.png");
         mainPlayer = new Texture("ninja1.png");
         friendlyPlayers = new HashMap<String, Player>();
+        bulletsPlayers = new HashMap<String, Bullet>();
 
         this.game = game;
         gamecam = new OrthographicCamera();
@@ -71,7 +80,8 @@ public class PlayScreen implements Screen{
         maploader = new TmxMapLoader();
         map = maploader.load("map1.tmx");
         renderer = new OrthogonalTiledMapRenderer(map);
-        connectSocket();
+        //estalecemos el socket.
+        socket = conection.connectSocket();
         configSocketEvents();
 
     }
@@ -86,20 +96,31 @@ public class PlayScreen implements Screen{
             if(Gdx.input.isKeyPressed(Input.Keys.LEFT)){
                 if(player.getX() > 30){
                     player.setPosition(player.getX()+(-200*dt),player.getY());
+                    direccion=2;
                 }
             }else if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)){
                 if(player.getX() < 600){
                     player.setPosition(player.getX()+(+200*dt),player.getY());
+                    direccion=1;
                 }
             }else if(Gdx.input.isKeyPressed(Input.Keys.UP)){
                 if(player.getY() < 440){
                     player.setPosition(player.getX(),player.getY()+(+200*dt));
+                    direccion=0;
                 }
             }else if(Gdx.input.isKeyPressed(Input.Keys.DOWN)){
                 if(player.getY() > 30){
                     player.setPosition(player.getX(),player.getY()+(-200*dt));
+                    direccion=3;
                 }
+            }else if(Gdx.input.isKeyJustPressed(Input.Keys.SPACE)){
+                Gdx.app.log("X DISPARO","DISPARO"+player.getX());
+                bulletsList.add(new Bullet((int)player.getX(),(int)player.getY(),direcciones[direccion] * (float)(Math.PI / 2)));
+                disparo = true;
+                //UPDATESERVER PARA ENVIAR EL DISPARO A LOS DEMAS CLIENTES
+                updateServer(Gdx.graphics.getDeltaTime());
             }
+            disparo = false;
         }
     }
 
@@ -115,6 +136,7 @@ public class PlayScreen implements Screen{
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         updateServer(Gdx.graphics.getDeltaTime());
         handleInput(Gdx.graphics.getDeltaTime());
+        hud.update(Gdx.graphics.getDeltaTime());
         renderer.render();
         game.batch.setProjectionMatrix(hud.stage.getCamera().combined);
         hud.stage.draw();
@@ -126,15 +148,15 @@ public class PlayScreen implements Screen{
         for(Map.Entry<String, Player> entry : friendlyPlayers.entrySet()){
             entry.getValue().draw(batch);
         }
+        for(Map.Entry<String, Bullet> entry : bulletsPlayers.entrySet()){
+            entry.getValue().draw(batch);
+        }
         for (Bullet b : bulletsList){
             b.draw(batch);
         }
         batch.end();
         for (Bullet b : bulletsList){
             b.update(Gdx.graphics.getDeltaTime());
-        }
-        if(Gdx.input.isKeyPressed(Input.Keys.SPACE)){
-            bulletsList.add(new Bullet((int)player.getX(),(int)player.getY(),90 * (float)(Math.PI / 2)));
         }
     }
 
@@ -163,6 +185,7 @@ public class PlayScreen implements Screen{
     public void dispose() {
         mainPlayer.dispose();
         friendPlayer.dispose();
+        bullet.dispose();
 
     }
 
@@ -181,16 +204,19 @@ public class PlayScreen implements Screen{
                 Gdx.app.log("SOCKET.IO","Error enviando datos de recarga");
             }
         }
-    }
-    public void connectSocket(){
-        try {
-            socket = IO.socket("http://192.168.2.248:8080");
-            socket.connect();
-        }catch (Exception e){
-            System.out.print(e);
+        if(timer > UPDATE_TIME && player != null && disparo){
+            JSONObject data = new JSONObject();
+            try {
+                data.put("x",player.getX());
+                data.put("y",player.getY());
+                data.put("direction",direccion);
+                socket.emit("playerShoot",data);
+
+            }catch (JSONException e){
+                Gdx.app.log("SOCKET.IO","Error enviando datos de recarga");
+            }
         }
     }
-
 
     public void configSocketEvents() {
         socket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
@@ -229,7 +255,6 @@ public class PlayScreen implements Screen{
             public void call(Object... args) {
                 JSONObject data = (JSONObject) args[0];
                 try {
-
                     id = data.getString("id");
                     friendlyPlayers.remove(id);
                 } catch (JSONException e) {
@@ -271,6 +296,25 @@ public class PlayScreen implements Screen{
                         friendlyPlayers.put(objects.getJSONObject(i).getString("id"), coopPlayer);
                     }
                 } catch(JSONException e){
+
+                }
+            }
+        }).on("playerShoot" ,new Emitter.Listener(){
+            @Override
+            public void call(Object... args) {
+                JSONObject data = (JSONObject) args[0];
+                try {
+                    String playerId = data.getString("id");
+                    double x = data.getDouble("x");
+                    double y = data.getDouble("y");
+                    int direction = data.getInt("direction");
+                    //Texture texutraStep = new Texture(texture);
+                    Gdx.app.log("SocketID","shoot : "+direction+" posx; "+x+" posy: "+y);
+                    if(friendlyPlayers.get(playerId)!=null){
+                        bulletsList.add(new Bullet((int)x,(int)y,direcciones[direction] * (float)(Math.PI / 2)));
+                    }
+
+                } catch (JSONException e) {
 
                 }
             }
