@@ -12,7 +12,7 @@ import Tools.Colision;
  * Created by cfgs on 11/05/17.
  */
 
-public class Bullet extends Sprite{
+public class Bullet {
     float a,time;
     Rectangle hitbox;
     int speed;
