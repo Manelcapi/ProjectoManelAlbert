@@ -1,0 +1,89 @@
+
+Ninja1.png
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+ninja1Right
+  rotate: false
+  xy: 1, 2
+  size: 34, 36
+  orig: 34, 36
+  offset: 0, 0
+  index: -1
+ninja1Left
+  rotate: false
+  xy: 37, 2
+  size: 34, 36
+  orig: 34, 36
+  offset: 0, 0
+  index: -1
+ninja1Top
+  rotate: false
+  xy: 73, 2
+  size: 34, 36
+  orig: 34, 36
+  offset: 0, 0
+  index: -1
+ninja1Down
+  rotate: false
+  xy: 109, 2
+  size: 33, 36
+  orig: 33, 36
+  offset: 0, 0
+  index: -1
+ninja1TopStep1
+  rotate: false
+  xy: 144, 2
+  size: 32, 36
+  orig: 32, 36
+  offset: 0, 0
+  index: -1
+ninja1RightStep1
+  rotate: false
+  xy: 178, 2
+  size: 32, 36
+  orig: 32, 36
+  offset: 0, 0
+  index: -1
+ninja1RightStep2
+  rotate: false
+  xy: 212, 2
+  size: 32, 36
+  orig: 32, 36
+  offset: 0, 0
+  index: -1
+ninja1DownStep2
+  rotate: false
+  xy: 246, 2
+  size: 32, 36
+  orig: 32, 36
+  offset: 0, 0
+  index: -1
+ninja1TopStep2
+  rotate: false
+  xy: 280, 2
+  size: 32, 36
+  orig: 32, 36
+  offset: 0, 0
+  index: -1
+ninja1DownStep1
+  rotate: false
+  xy: 314, 1
+  size: 32, 37
+  orig: 32, 37
+  offset: 0, 0
+  index: -1
+ninja1LeftStep1
+  rotate: false
+  xy: 348, 3
+  size: 32, 35
+  orig: 32, 35
+  offset: 0, 0
+  index: -1
+ninja1LeftStep2
+  rotate: false
+  xy: 382, 3
+  size: 32, 35
+  orig: 32, 35
+  offset: 0, 0
+  index: -1
