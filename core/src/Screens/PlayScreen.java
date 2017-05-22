@@ -28,20 +28,24 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Random;
 
+import Connection.Connection;
 import Scenes.Hud;
 import io.socket.client.IO;
 import io.socket.emitter.Emitter;
 import io.socket.client.Socket;
 import sprites.Bullet;
+import sprites.Enemy;
 import sprites.Player;
 
 /**
  * Created by cfgs on 15/05/17.
  */
 
-public class PlayScreen implements Screen{
+public class PlayScreen implements Screen {
 
     private MyGdxGame game;
     private TextureAtlas atlas;
@@ -54,9 +58,9 @@ public class PlayScreen implements Screen{
     private Viewport gamePort;
     private Hud hud;
     private boolean disparo;
-    private final float UPDATE_TIME = 1/60f;
+    private final float UPDATE_TIME = 1 / 60f;
     private TmxMapLoader maploader;
-    private int[] direcciones = {0,1,-1,90};
+    private int[] direcciones = {0, 1, -1, 90};
     private int direccion;
     private TiledMap map;
     private OrthogonalTiledMapRenderer renderer;
@@ -69,31 +73,30 @@ public class PlayScreen implements Screen{
     Texture friendPlayer;
     Texture mainPlayer;
     Texture bullet;
+    Texture enemy;
     Map<String, Player> friendlyPlayers;
-    Map<String,Bullet> bulletsPlayers;
-    TiledMapTileLayer cell ;
+    TiledMapTileLayer cell;
     ArrayList<Bullet> bulletsList = new ArrayList<Bullet>();
-    ArrayList<Rectangle> obtaculos = new ArrayList<Rectangle>();
+    ArrayList<Enemy> obtaculos = new ArrayList<Enemy>();
     private Socket socket;
 
-    public PlayScreen(MyGdxGame game){
+    public PlayScreen(MyGdxGame game) {
         //Creando conexion
-         Connection conection = new Connection();
-
+        Connection conection = new Connection();
 
         atlas = new TextureAtlas("Ninja1.pack");
-        walkRight = new Animation(1/60f,atlas.getRegions());
+        bullet = new Texture("ataque.png");
+        enemy = new Texture("ninja2.png");
+        walkRight = new Animation(1 / 60f, atlas.getRegions());
 
         //Creacion jugadores
         batch = new SpriteBatch();
         friendlyPlayers = new HashMap<String, Player>();
-        bulletsPlayers = new HashMap<String, Bullet>();
-
         this.game = game;
         gamecam = new OrthographicCamera();
         gamecam.position.x = 320;
         gamecam.position.y = 320;
-        gamePort = new FitViewport(MyGdxGame.V_WIDTH , MyGdxGame.V_HEIGHT ,gamecam);
+        gamePort = new FitViewport(MyGdxGame.V_WIDTH, MyGdxGame.V_HEIGHT, gamecam);
         hud = new Hud(game.batch);
         maploader = new TmxMapLoader();
         map = maploader.load("map1.tmx");
@@ -102,7 +105,7 @@ public class PlayScreen implements Screen{
         int mapWidth = cell.getWidth() * tileSize;
         int mapHeight = cell.getHeight() * tileSize;
 
-        renderer = new OrthogonalTiledMapRenderer(map, 1 );
+        renderer = new OrthogonalTiledMapRenderer(map, 1);
 
         music = MyGdxGame.manager.get("audio/music/TheSunRises.mp3", Music.class);
         music.setLooping(true);
@@ -111,7 +114,6 @@ public class PlayScreen implements Screen{
         getRectangles();
         //player = new Player(world, this);
 
-        connectSocket();
         renderer = new OrthogonalTiledMapRenderer(map);
         //estalecemos el socket.
         socket = conection.connectSocket();
@@ -122,7 +124,7 @@ public class PlayScreen implements Screen{
     private void getRectangles() {
     }
 
-    public TextureAtlas getAtlas(){
+    public TextureAtlas getAtlas() {
         return atlas;
     }
 
@@ -131,87 +133,70 @@ public class PlayScreen implements Screen{
 
     }
 
-    public void handleInput(float dt){
-        if(player != null){
-            boolean x = cell.getCell((int)player.getX()*20/MyGdxGame.V_WIDTH,(int)player.getY()*20/MyGdxGame.V_HEIGHT).getTile().getProperties().containsKey
-                    ("blocked");
+    public void handleInput(float dt) {
+        if (player != null) {
+            //boolean x = cell.getCell((int) player.getX() * 20 / MyGdxGame.V_WIDTH, (int) player.getY() * 20 / MyGdxGame.V_HEIGHT).getTile().getProperties().containsKey
+            //("blocked");
             float previousPositionX = player.getX();
             float previousPositionY = player.getY();
 
-            if(Gdx.input.isKeyPressed(Input.Keys.LEFT)){
-                if(player.getX() > 30){
-                    player.setPosition(player.getX()+(-200*dt),player.getY());
-                    direccion=2;
-                if(player.getX()>32){
-                    player.setPosition(player.getX()+(-100*dt),player.getY());
-                }else{
-                    player.setPosition(previousPositionX,previousPositionY);
-                    Gdx.app.log("Toque izquierda","data");
+            if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+                if (player.getX() > 32) {
+                    player.setPosition(player.getX() + (-200 * dt), player.getY());
+                    direccion = 2;
+                } else {
+                    player.setPosition(previousPositionX, previousPositionY);
+                    Gdx.app.log("Toque izquierda", "data");
                 }
-            }else if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)){
-                if(player.getX() < 600){
-                    player.setPosition(player.getX()+(+200*dt),player.getY());
-                    direccion=1;
+            }
+            if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+                if (player.getX() < 589) {
+                    player.setPosition(player.getX() + (+200 * dt), player.getY());
+                    direccion = 1;
 
-            }if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)){
-
-                Array<Rectangle> tiles = getTiles((int)(player.getX()/32 + 1), (int)(player.getY()/32 - 1),
-                        (int)(player.getX()/32 + 1), (int)(player.getY()/32 + 1));
-
-                for (Rectangle tile : tiles) {
-
-                    if(player.getHitbox().overlaps(tile)) {
-                        Gdx.app.log("overlap right","data");
-                        player.setPosition(tile.x - player.getWidth() , player.getY());
-                    }
+                } else {
+                    player.setPosition(previousPositionX, previousPositionY);
+                    Gdx.app.log("Toque derecha", "data");
                 }
-            }else if(Gdx.input.isKeyPressed(Input.Keys.UP)){
-                if(player.getY() < 440){
-                    player.setPosition(player.getX(),player.getY()+(+200*dt));
-                    direccion=0;
-
-                if(player.getX()< 589){
-                    player.setPosition(player.getX()+(+100*dt),player.getY());
-                }else{
-                    player.setPosition(previousPositionX,previousPositionY);
-                    Gdx.app.log("Toque derecha","data");
+            }
+            if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
+                if (player.getY() < 448) {
+                    player.setPosition(player.getX(), player.getY() + (+200 * dt));
+                    direccion = 0;
+                } else {
+                    player.setPosition(previousPositionX, previousPositionY);
+                    Gdx.app.log("Toque arriba", "data");
                 }
 
-            }if(Gdx.input.isKeyPressed(Input.Keys.UP)){
-                if(player.getY()< 448){
-                    player.setPosition(player.getX(),player.getY()+(+100*dt));
-                }else{
-                    player.setPosition(previousPositionX,previousPositionY);
-                    Gdx.app.log("Toque arriba","data");
-            }else if(Gdx.input.isKeyPressed(Input.Keys.DOWN)){
-                if(player.getY() > 30){
-                    player.setPosition(player.getX(),player.getY()+(-200*dt));
-                    direccion=3;
+
+            }
+            if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
+                if (player.getY() > 50) {
+                    player.setPosition(player.getX(), player.getY() + (-200 * dt));
+                    direccion = 3;
+                } else {
+                    player.setPosition(previousPositionX, previousPositionY);
+                    Gdx.app.log("Toque abajo", "data");
                 }
-            }else if(Gdx.input.isKeyJustPressed(Input.Keys.SPACE)){
-                Gdx.app.log("X DISPARO","DISPARO"+player.getX());
-                bulletsList.add(new Bullet((int)player.getX(),(int)player.getY(),direcciones[direccion] * (float)(Math.PI / 2)));
+            }
+
+
+            if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
+                Gdx.app.log("X DISPARO", "DISPARO" + player.getX());
+                bulletsList.add(new Bullet((int) player.getX(), (int) player.getY(), direcciones[direccion] * (float) (Math.PI / 2), bullet));
                 disparo = true;
                 //UPDATESERVER PARA ENVIAR EL DISPARO A LOS DEMAS CLIENTES
                 updateServer(Gdx.graphics.getDeltaTime());
 
-            }if(Gdx.input.isKeyPressed(Input.Keys.DOWN)){
-                if(player.getY()>50){
-                    player.setPosition(player.getX(),player.getY()+(-100*dt));
-                }else{
-                    player.setPosition(previousPositionX,previousPositionY);
-                    Gdx.app.log("Toque abajo","data");
-                }
             }
             disparo = false;
+
         }
     }
 
 
-    public void update(float dt){
-
-        handleInput(dt);
-        if(player != null){
+    public void update(float dt) {
+        if (player != null) {
             player.update(dt);
         }
 
@@ -224,43 +209,46 @@ public class PlayScreen implements Screen{
     @Override
     public void render(float delta) {
         update(delta);
-        Gdx.gl.glClearColor(0,0,0,1);
+        Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         updateServer(Gdx.graphics.getDeltaTime());
         handleInput(Gdx.graphics.getDeltaTime());
         hud.update(Gdx.graphics.getDeltaTime());
-        updateServer(delta);
-        handleInput(delta);
-
+        checkHitsBullets();
         //REnder game map
         renderer.render();
-
-         game.batch.setProjectionMatrix(hud.stage.getCamera().combined);
+        game.batch.setProjectionMatrix(hud.stage.getCamera().combined);
         hud.stage.draw();
         batch.begin();
 
-        if(player != null){
+        if (player != null) {
             player.draw(batch);
 
         }
-        for(Map.Entry<String, Player> entry : friendlyPlayers.entrySet()){
+        //dibujar personajes amigos
+        for (Map.Entry<String, Player> entry : friendlyPlayers.entrySet()) {
             entry.getValue().draw(batch);
         }
-        for(Map.Entry<String, Bullet> entry : bulletsPlayers.entrySet()){
-            entry.getValue().draw(batch);
-        }
-        for (Bullet b : bulletsList){
+        for (Enemy b : obtaculos) {
             b.draw(batch);
         }
+        for (Bullet b : bulletsList) {
+            b.draw(batch);
+            //b.render(batch);
+        }
         batch.end();
-        for (Bullet b : bulletsList){
+        for (Bullet b : bulletsList) {
             b.update(Gdx.graphics.getDeltaTime());
         }
+        for (Enemy b : obtaculos) {
+            b.update(Gdx.graphics.getDeltaTime());
+        }
+        deleteBullets();
     }
 
     @Override
     public void resize(int width, int height) {
-        gamePort.update(width,height);
+        gamePort.update(width, height);
 
     }
 
@@ -283,38 +271,39 @@ public class PlayScreen implements Screen{
     public void dispose() {
         map.dispose();
         renderer.dispose();
-        hud.dispose();
         mainPlayer.dispose();
         friendPlayer.dispose();
         bullet.dispose();
+        enemy.dispose();
+
 
     }
 
-    public void updateServer(float dt){
+    public void updateServer(float dt) {
         timer += dt;
-        if(timer > UPDATE_TIME && player != null && player.hasMoved()){
+        if (timer > UPDATE_TIME && player != null && player.hasMoved()) {
             JSONObject data = new JSONObject();
             try {
-                data.put("x",player.getX());
-                data.put("y",player.getY());
-                String path = ((FileTextureData)player.getTexture().getTextureData()).getFileHandle().path();
-                data.put("texture",path);
-                socket.emit("playerMoved",data);
+                data.put("x", player.getX());
+                data.put("y", player.getY());
+                String path = ((FileTextureData) player.getTexture().getTextureData()).getFileHandle().path();
+                data.put("texture", path);
+                socket.emit("playerMoved", data);
 
-            }catch (JSONException e){
-                Gdx.app.log("SOCKET.IO","Error enviando datos de recarga");
+            } catch (JSONException e) {
+                Gdx.app.log("SOCKET.IO", "Error enviando datos de recarga");
             }
         }
-        if(timer > UPDATE_TIME && player != null && disparo){
+        if (timer > UPDATE_TIME && player != null && disparo) {
             JSONObject data = new JSONObject();
             try {
-                data.put("x",player.getX());
-                data.put("y",player.getY());
-                data.put("direction",direccion);
-                socket.emit("playerShoot",data);
+                data.put("x", player.getX());
+                data.put("y", player.getY());
+                data.put("direction", direccion);
+                socket.emit("playerShoot", data);
 
-            }catch (JSONException e){
-                Gdx.app.log("SOCKET.IO","Error enviando datos de recarga");
+            } catch (JSONException e) {
+                Gdx.app.log("SOCKET.IO", "Error enviando datos de recarga");
             }
         }
     }
@@ -324,9 +313,11 @@ public class PlayScreen implements Screen{
         socket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
             @Override
             public void call(Object... args) {
-                Gdx.app.log("SocketIO","Connected");
+                Gdx.app.log("SocketIO", "Connected");
                 player = new Player(PlayScreen.this);
-                player.setPosition(200,200);
+                int randomNum = 10 + (int)(Math.random() * 500);
+
+                player.setPosition(randomNum, 60);
             }
         }).on("socketID", new Emitter.Listener() {
             @Override
@@ -335,12 +326,12 @@ public class PlayScreen implements Screen{
                 try {
 
                     id = data.getString("id");
-                    Gdx.app.log("SocketID","My ID: "+id);
-                }catch (JSONException e){
-                    Gdx.app.log("SocketID","Error Estableciendo ID");
+                    Gdx.app.log("SocketID", "My ID: " + id);
+                } catch (JSONException e) {
+                    Gdx.app.log("SocketID", "Error Estableciendo ID");
                 }
             }
-        }).on("newPlayer" ,new Emitter.Listener(){
+        }).on("newPlayer", new Emitter.Listener() {
             @Override
             public void call(Object... args) {
                 JSONObject data = (JSONObject) args[0];
@@ -348,12 +339,12 @@ public class PlayScreen implements Screen{
 
                     String playerId = data.getString("id");
                     Gdx.app.log("SocketID", "Nuevo jugador Conectado: " + id);
-                    friendlyPlayers.put(playerId,new Player(PlayScreen.this));
+                    friendlyPlayers.put(playerId, new Player(PlayScreen.this));
                 } catch (JSONException e) {
                     Gdx.app.log("SocketID", "Error estableciendo nuevo jugador");
                 }
             }
-        }).on("playerDisconnected" ,new Emitter.Listener(){
+        }).on("playerDisconnected", new Emitter.Listener() {
             @Override
             public void call(Object... args) {
                 JSONObject data = (JSONObject) args[0];
@@ -365,7 +356,7 @@ public class PlayScreen implements Screen{
                     Gdx.app.log("SocketID", "Error desconectando jugador");
                 }
             }
-        }).on("playerMoved" ,new Emitter.Listener(){
+        }).on("playerMoved", new Emitter.Listener() {
             @Override
             public void call(Object... args) {
                 JSONObject data = (JSONObject) args[0];
@@ -375,10 +366,14 @@ public class PlayScreen implements Screen{
                     Double y = data.getDouble("y");
                     String texture = data.getString("texture");
                     //Texture texutraStep = new Texture(texture);
-                    Gdx.app.log("SocketID","move: "+texture);
-                    if(friendlyPlayers.get(playerId)!=null){
-                        friendlyPlayers.get(playerId).setPosition(x.floatValue(),y.floatValue());
+                    Gdx.app.log("SocketID", "move: " + texture);
+                    if (friendlyPlayers.get(playerId) != null) {
+                        friendlyPlayers.get(playerId).setPosition(x.floatValue(), y.floatValue());
+                        Rectangle hitbox = new Rectangle(x.floatValue(), y.floatValue(), 33, 36);
+                        friendlyPlayers.get(playerId).setHitbox(hitbox);
                         //friendlyPlayers.get(playerId).setTexture(texutraStep);
+                        int randomNum = 10 + (int)(Math.random() * 500);
+                        obtaculos.add(new Enemy( randomNum, 500, direcciones[3] * (float) (Math.PI / 2), enemy));
                     }
 
                 } catch (JSONException e) {
@@ -390,20 +385,20 @@ public class PlayScreen implements Screen{
             public void call(Object... args) {
                 JSONArray objects = (JSONArray) args[0];
                 try {
-                    for(int i = 0; i < objects.length(); i++){
+                    for (int i = 0; i < objects.length(); i++) {
                         Player coopPlayer = new Player(PlayScreen.this);
                         Vector2 position = new Vector2();
                         position.x = ((Double) objects.getJSONObject(i).getDouble("x")).floatValue();
                         position.y = ((Double) objects.getJSONObject(i).getDouble("y")).floatValue();
                         coopPlayer.setPosition(position.x, position.y);
-
+                        coopPlayer.setHitbox(new Rectangle(position.x, position.y, 33, 36));
                         friendlyPlayers.put(objects.getJSONObject(i).getString("id"), coopPlayer);
                     }
-                } catch(JSONException e){
+                } catch (JSONException e) {
 
                 }
             }
-        }).on("playerShoot" ,new Emitter.Listener(){
+        }).on("playerShoot", new Emitter.Listener() {
             @Override
             public void call(Object... args) {
                 JSONObject data = (JSONObject) args[0];
@@ -413,9 +408,9 @@ public class PlayScreen implements Screen{
                     double y = data.getDouble("y");
                     int direction = data.getInt("direction");
                     //Texture texutraStep = new Texture(texture);
-                    Gdx.app.log("SocketID","shoot : "+direction+" posx; "+x+" posy: "+y);
-                    if(friendlyPlayers.get(playerId)!=null){
-                        bulletsList.add(new Bullet((int)x,(int)y,direcciones[direction] * (float)(Math.PI / 2)));
+                    Gdx.app.log("SocketID", "shoot : " + direction + " posx; " + x + " posy: " + y);
+                    if (friendlyPlayers.get(playerId) != null) {
+                        bulletsList.add(new Bullet((int) x, (int) y, direcciones[direction] * (float) (Math.PI / 2), bullet));
                     }
 
                 } catch (JSONException e) {
@@ -426,17 +421,57 @@ public class PlayScreen implements Screen{
     }
 
     private Array<Rectangle> getTiles(int startX, int startY, int endX, int endY) {
-        TiledMapTileLayer layer = (TiledMapTileLayer)map.getLayers().get(0);
+        TiledMapTileLayer layer = (TiledMapTileLayer) map.getLayers().get(0);
         Array<Rectangle> rectangles = new Array<Rectangle>();
         for (int x = startX; x <= endX; x++) {
             for (int y = startY; y <= endY; y++) {
                 TiledMapTileLayer.Cell cell = layer.getCell(x, y);
-                if(cell != null) {
-                    Rectangle rect = new Rectangle(x*32, y*32, 32, 32);
+                if (cell != null) {
+                    Rectangle rect = new Rectangle(x * 32, y * 32, 32, 32);
                     rectangles.add(rect);
                 }
             }
         }
         return rectangles;
     }
+
+    //Chekea si la vala a dado a un enemigo
+    public void checkHitsBullets() {
+
+        Iterator<Enemy> iterEnemy = obtaculos.iterator();
+        while (iterEnemy.hasNext()) {
+            Enemy enemy = iterEnemy.next();
+            Iterator<Bullet> iterBul = bulletsList.iterator();
+            while (iterBul.hasNext()) {
+                Bullet b = iterBul.next();
+
+                if (enemy.hitMe(b.getHitbox())) {
+
+                    iterBul.remove();
+                    iterEnemy.remove();
+                    hud.addScore(10);
+                } else {
+                    Gdx.app.log("X:", " EEEEEEEEEEEEEEEEEEEEEEEEELSE");
+                    Gdx.app.log("X:", " BULLETx: " + b.getHitbox().getX());
+                    Gdx.app.log("Y:", " BULLETy: " + b.getHitbox().getY());
+                }
+            }
+
+        }
+    }
+
+    //borra las balas que sobresalen del mapa
+    public void deleteBullets() {
+
+        Iterator<Bullet> iterBul = bulletsList.iterator();
+        while (iterBul.hasNext()) {
+            Bullet b = iterBul.next();
+            if(b.getHitbox().getX() > 650 || b.getHitbox().getX() < 0 || b.getHitbox().getY()> 650 || b.getHitbox().getY()< 0){
+                iterBul.remove();
+            }
+        }
+
+
+    }
+
 }

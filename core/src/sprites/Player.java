@@ -22,7 +22,7 @@ public class Player extends Sprite{
         super(screen.getAtlas().findRegion("ninja1Down"));
         previousPosition = new Vector2(getX(),getY());
         ninja1 = new TextureRegion(getTexture(), 109, 2, 33,36);
-        hitbox = new Rectangle(this.getX(),this.getY(),23,36);
+        hitbox = new Rectangle(this.getX(),this.getY(),33,36);
         setRegion(ninja1);
 
     }
@@ -34,12 +34,13 @@ public class Player extends Sprite{
     public void setHitbox(Rectangle hitbox) {
         this.hitbox = hitbox;
     }
+    public boolean hitMe(Rectangle hitbox) {
+        return hitbox.overlaps(hitbox);
+    }
 
     public void update(float dt){
     }
 
-    public void definePlayer(){
-    }
 
     public boolean hasMoved(){
         if(previousPosition.x != getX() || previousPosition.y != getY()){
