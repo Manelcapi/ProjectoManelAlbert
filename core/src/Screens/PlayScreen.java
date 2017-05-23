@@ -30,11 +30,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Random;
 
 import Connection.Connection;
 import Scenes.Hud;
-import io.socket.client.Socket;
+import io.socket.client.IO;
 import io.socket.emitter.Emitter;
+import io.socket.client.Socket;
 import sprites.Bullet;
 import sprites.Enemy;
 import sprites.Player;
@@ -43,7 +45,7 @@ import sprites.Player;
  * Created by cfgs on 15/05/17.
  */
 
-public class PlayScreen implements Screen {
+public class PlayScreen implements Screen{
 
     private MyGdxGame game;
     private TextureAtlas atlas;
@@ -56,9 +58,9 @@ public class PlayScreen implements Screen {
     private Viewport gamePort;
     private Hud hud;
     private boolean disparo;
-    private final float UPDATE_TIME = 1 / 60f;
+    private final float UPDATE_TIME = 1/60f;
     private TmxMapLoader maploader;
-    private int[] direcciones = {0, 1, -1, 90};
+    private int[] direcciones = {0,1,-1,90};
     private int direccion;
     private TiledMap map;
     private OrthogonalTiledMapRenderer renderer;
@@ -83,6 +85,7 @@ public class PlayScreen implements Screen {
         //Creando conexion
         Connection conection = new Connection();
 
+
         atlas = new TextureAtlas("Ninja1.pack");
         bullet = new Texture("ataque.png");
         enemy = new Texture("ninja1.png");
@@ -95,7 +98,7 @@ public class PlayScreen implements Screen {
         gamecam = new OrthographicCamera();
         gamecam.position.x = 320;
         gamecam.position.y = 320;
-        gamePort = new FitViewport(MyGdxGame.V_WIDTH, MyGdxGame.V_HEIGHT, gamecam);
+        gamePort = new FitViewport(MyGdxGame.V_WIDTH , MyGdxGame.V_HEIGHT ,gamecam);
         hud = new Hud(game.batch);
         maploader = new TmxMapLoader();
         map = maploader.load("map1.tmx");
@@ -104,7 +107,7 @@ public class PlayScreen implements Screen {
         int mapWidth = cell.getWidth() * tileSize;
         int mapHeight = cell.getHeight() * tileSize;
 
-        renderer = new OrthogonalTiledMapRenderer(map, 1);
+        renderer = new OrthogonalTiledMapRenderer(map, 1 );
 
         music = MyGdxGame.manager.get("audio/music/TheSunRises.mp3", Music.class);
         music.setLooping(true);
@@ -123,7 +126,7 @@ public class PlayScreen implements Screen {
     private void getRectangles() {
     }
 
-    public TextureAtlas getAtlas() {
+    public TextureAtlas getAtlas(){
         return atlas;
     }
 
@@ -189,7 +192,6 @@ public class PlayScreen implements Screen {
 
             }
             disparo = false;
-
         }
     }
 
@@ -208,7 +210,7 @@ public class PlayScreen implements Screen {
     @Override
     public void render(float delta) {
         update(delta);
-        Gdx.gl.glClearColor(0, 0, 0, 1);
+        Gdx.gl.glClearColor(0,0,0,1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         updateServer(Gdx.graphics.getDeltaTime());
         handleInput(Gdx.graphics.getDeltaTime());

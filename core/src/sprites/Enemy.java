@@ -3,8 +3,13 @@ package sprites;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 
+import Tools.Colision;
+
+import Screens.PlayScreen;
 import Tools.Colision;
 
 
@@ -29,7 +34,7 @@ public class Enemy extends Sprite{
     public Enemy (int x,int y ,float angle, Texture texture) {
         time = 2;
         speed = 10;
-        hitbox = new Rectangle(x,y,40,40);
+        hitbox = new Rectangle(x,y,10,10);
         this.texture = texture;
         a = angle;
     }
@@ -52,11 +57,12 @@ public class Enemy extends Sprite{
     /*public boolean isDead(){
         if(time<0)
             return true;
+
         return false;
     }*/
     public void draw (SpriteBatch batch){
 
-        batch.draw(texture,hitbox.x,hitbox.y,40,40);
+        batch.draw(texture,hitbox.x,hitbox.y,10,10);
     }
     public boolean hitMe(Rectangle hitbox) {
         return this.hitbox.overlaps(hitbox);
