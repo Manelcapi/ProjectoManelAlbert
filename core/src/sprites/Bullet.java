@@ -1,11 +1,9 @@
 package sprites;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Vector2;
 
 import Tools.Colision;
 
@@ -28,11 +26,11 @@ public class Bullet extends Sprite{
         super(texture);
     }
 
-    public Bullet (int x,int y ,float angle) {
+    public Bullet (int x,int y ,float angle, Texture texture) {
         time = 2;
         speed = 300;
         hitbox = new Rectangle(x,y,10,10);
-        texture = new Texture("ataque.png");
+        this.texture = texture;
         a = angle;
     }
 
@@ -51,15 +49,14 @@ public class Bullet extends Sprite{
         batch.draw(texture, x, y);
     }
 
-    public boolean isDead(){
+    /*public boolean isDead(){
         if(time<0)
             return true;
-
         return false;
-    }
+    }*/
     public void draw (SpriteBatch batch){
 
-            batch.draw(texture,hitbox.x,hitbox.y,10,10);
+        batch.draw(texture,hitbox.x,hitbox.y,10,10);
     }
 
     /*public void draw(SpriteBatch batch){

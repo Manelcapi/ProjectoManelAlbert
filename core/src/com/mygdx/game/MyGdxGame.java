@@ -5,7 +5,7 @@ import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
-import Screens.PlayScreen;
+import Screens.MainMenu;
 
 public class MyGdxGame extends Game {
 	public static final int V_WIDTH = 640;
@@ -21,7 +21,7 @@ public class MyGdxGame extends Game {
 		manager = new AssetManager();
 		manager.load("audio/music/TheSunRises.mp3", Music.class);
 		manager.finishLoading();
-		setScreen(new PlayScreen(this));
+		setScreen(new MainMenu(this));
 
 	}
 

@@ -79,8 +79,4 @@ public class Hud implements Disposable{
         return score;
     }
 
-    @Override
-    public void dispose() {
-        stage.dispose();
-    }
 }
