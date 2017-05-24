@@ -103,9 +103,6 @@ public class PlayScreen implements Screen{
         maploader = new TmxMapLoader();
         map = maploader.load("map1.tmx");
         cell = ((TiledMapTileLayer) (map.getLayers().get(0)));
-        int tileSize = (int) cell.getTileWidth();
-        int mapWidth = cell.getWidth() * tileSize;
-        int mapHeight = cell.getHeight() * tileSize;
 
         renderer = new OrthogonalTiledMapRenderer(map, 1 );
 
@@ -113,7 +110,6 @@ public class PlayScreen implements Screen{
         music.setLooping(true);
         music.setVolume(0.3f);
         music.play();
-        getRectangles();
         //player = new Player(world, this);
 
         renderer = new OrthogonalTiledMapRenderer(map);
@@ -123,8 +119,6 @@ public class PlayScreen implements Screen{
 
     }
 
-    private void getRectangles() {
-    }
 
     public TextureAtlas getAtlas(){
         return atlas;
@@ -148,7 +142,6 @@ public class PlayScreen implements Screen{
                     direccion = 2;
                 } else {
                     player.setPosition(previousPositionX, previousPositionY);
-                    Gdx.app.log("Toque izquierda", "data");
                 }
             }
             if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
@@ -158,7 +151,6 @@ public class PlayScreen implements Screen{
 
                 } else {
                     player.setPosition(previousPositionX, previousPositionY);
-                    Gdx.app.log("Toque derecha", "data");
                 }
             }
             if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
@@ -167,7 +159,6 @@ public class PlayScreen implements Screen{
                     direccion = 0;
                 } else {
                     player.setPosition(previousPositionX, previousPositionY);
-                    Gdx.app.log("Toque arriba", "data");
                 }
 
 
@@ -178,13 +169,13 @@ public class PlayScreen implements Screen{
                     direccion = 3;
                 } else {
                     player.setPosition(previousPositionX, previousPositionY);
-                    Gdx.app.log("Toque abajo", "data");
                 }
             }
 
 
             if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
-                Gdx.app.log("X DISPARO", "DISPARO" + player.getX());
+                Gdx.app.log("X DISPARO", "DISPARO: " + player.getX());
+                Gdx.app.log("Y DISPARO", "DISPARO: " + player.getY());
                 bulletsList.add(new Bullet((int) player.getX(), (int) player.getY(), direcciones[direccion] * (float) (Math.PI / 2), bullet));
                 disparo = true;
                 //UPDATESERVER PARA ENVIAR EL DISPARO A LOS DEMAS CLIENTES
@@ -457,10 +448,6 @@ public class PlayScreen implements Screen{
                     iterBul.remove();
                     iterEnemy.remove();
                     hud.addScore(10);
-                } else {
-                    Gdx.app.log("X:", " EEEEEEEEEEEEEEEEEEEEEEEEELSE");
-                    Gdx.app.log("X:", " BULLETx: " + b.getHitbox().getX());
-                    Gdx.app.log("Y:", " BULLETy: " + b.getHitbox().getY());
                 }
             }
 

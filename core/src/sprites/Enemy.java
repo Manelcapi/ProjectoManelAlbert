@@ -34,7 +34,7 @@ public class Enemy extends Sprite{
     public Enemy (int x,int y ,float angle, Texture texture) {
         time = 2;
         speed = 10;
-        hitbox = new Rectangle(x,y,10,10);
+        hitbox = new Rectangle(x,y,30,30);
         this.texture = texture;
         a = angle;
     }
@@ -62,7 +62,7 @@ public class Enemy extends Sprite{
     }*/
     public void draw (SpriteBatch batch){
 
-        batch.draw(texture,hitbox.x,hitbox.y,10,10);
+        batch.draw(texture,hitbox.x,hitbox.y,30,30);
     }
     public boolean hitMe(Rectangle hitbox) {
         return this.hitbox.overlaps(hitbox);
