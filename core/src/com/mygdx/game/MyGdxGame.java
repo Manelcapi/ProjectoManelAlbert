@@ -20,6 +20,8 @@ public class MyGdxGame extends Game {
 		batch = new SpriteBatch();
 		manager = new AssetManager();
 		manager.load("audio/music/TheSunRises.mp3", Music.class);
+		manager.load("audio/efects/Shoot.mp3", Music.class);
+        manager.load("audio/music/Intro.mp3", Music.class);
 		manager.finishLoading();
 		setScreen(new MainMenu(this));
 

@@ -2,7 +2,7 @@ package Screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -24,7 +24,9 @@ public class MainMenu implements Screen {
     private Texture playButtonUnpres;
     private Texture exitButtonUnpres;
     private Texture exitButtonPress;
+    private Texture backgroundTexture;
     private TextureRegion background;
+    private Music music;
     SpriteBatch batch;
     public MainMenu (MyGdxGame game){
         this.game = game;
@@ -32,7 +34,11 @@ public class MainMenu implements Screen {
         playButtonUnpres = new Texture("PlayButtonUnpresss.jpg");
         exitButtonUnpres = new Texture("ExitButtonUnress.jpg");
         exitButtonPress = new Texture("ExitButtonPress.jpg");
-        background = new TextureRegion(new Texture("backgroundImage.jpg"), 0, 0, 640, 640);
+        backgroundTexture = new Texture("backgroundImage.jpg");
+        background = new TextureRegion(backgroundTexture, 0, 0, 640, 640);
+        music = MyGdxGame.manager.get("audio/music/Intro.mp3", Music.class);
+        music.setVolume(0.3f);
+        music.play();
     }
     @Override
     public void show() {
@@ -49,6 +55,7 @@ public class MainMenu implements Screen {
         if(Gdx.input.getX() < x + PLAY_BUTTON_WIDTH && Gdx.input.getX() > x && MyGdxGame.V_HEIGHT - Gdx.input.getY() < PLAY_BUTTON_HEIGHT + PLAY_BUTTON_Y && MyGdxGame.V_HEIGHT - Gdx.input.getY() > PLAY_BUTTON_Y){
             game.batch.draw(playButtonPress,x,PLAY_BUTTON_Y ,PLAY_BUTTON_WIDTH, PLAY_BUTTON_HEIGHT);
             if(Gdx.input.isTouched()){
+                music.stop();
                 game.setScreen(new PlayScreen(game));
             }
         }else
@@ -89,6 +96,10 @@ public class MainMenu implements Screen {
 
     @Override
     public void dispose() {
-
+        playButtonPress.dispose();
+        playButtonUnpres.dispose();
+        exitButtonPress.dispose();
+        exitButtonUnpres.dispose();
+        backgroundTexture.dispose();
     }
 }

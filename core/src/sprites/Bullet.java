@@ -13,25 +13,34 @@ import Tools.Colision;
  */
 
 public class Bullet extends Sprite{
-    float a,time;
-    Rectangle hitbox;
-    int speed;
+    private float a,time;
+    private Rectangle hitbox;
+    private int speed;
+    private String idPlayer;
 
-    Texture texture;
+    private Texture texture;
 
-    float x, y;
+    private float x, y;
     Colision rect;
     public boolean remove = false;
     public Bullet(Texture texture){
         super(texture);
     }
 
-    public Bullet (int x,int y ,float angle, Texture texture) {
+    public Bullet (int x,int y ,float angle, Texture texture,String idPlayer) {
         time = 2;
         speed = 300;
         hitbox = new Rectangle(x,y,10,10);
         this.texture = texture;
+        this.idPlayer = idPlayer;
         a = angle;
+    }
+    public String getIdPlayer() {
+        return idPlayer;
+    }
+
+    public void setIdPlayer(String idPlayer) {
+        this.idPlayer = idPlayer;
     }
 
     public Rectangle getHitbox() {

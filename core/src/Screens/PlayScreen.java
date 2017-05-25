@@ -30,13 +30,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Random;
 
 import Connection.Connection;
 import Scenes.Hud;
-import io.socket.client.IO;
-import io.socket.emitter.Emitter;
 import io.socket.client.Socket;
+import io.socket.emitter.Emitter;
 import sprites.Bullet;
 import sprites.Enemy;
 import sprites.Player;
@@ -51,9 +49,7 @@ public class PlayScreen implements Screen{
     private TextureAtlas atlas;
     private Animation walkRight;
     private float timePassed = 0;
-
     private Music music;
-
     private OrthographicCamera gamecam;
     private Viewport gamePort;
     private Hud hud;
@@ -64,8 +60,6 @@ public class PlayScreen implements Screen{
     private int direccion;
     private TiledMap map;
     private OrthogonalTiledMapRenderer renderer;
-
-
     float timer;
     SpriteBatch batch;
     Player player;
@@ -176,7 +170,10 @@ public class PlayScreen implements Screen{
             if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
                 Gdx.app.log("X DISPARO", "DISPARO: " + player.getX());
                 Gdx.app.log("Y DISPARO", "DISPARO: " + player.getY());
-                bulletsList.add(new Bullet((int) player.getX(), (int) player.getY(), direcciones[direccion] * (float) (Math.PI / 2), bullet));
+                bulletsList.add(new Bullet((int) player.getX(), (int) player.getY(), direcciones[direccion] * (float) (Math.PI / 2), bullet,id));
+                music = MyGdxGame.manager.get("audio/efects/Shoot.mp3", Music.class);
+                music.setVolume(0.3f);
+                music.play();
                 disparo = true;
                 //UPDATESERVER PARA ENVIAR EL DISPARO A LOS DEMAS CLIENTES
                 updateServer(Gdx.graphics.getDeltaTime());
@@ -217,7 +214,6 @@ public class PlayScreen implements Screen{
         else {
            timeSpawn += delta;
         }
-        game.batch.setProjectionMatrix(hud.stage.getCamera().combined);
         hud.stage.draw();
         batch.begin();
 
@@ -225,6 +221,8 @@ public class PlayScreen implements Screen{
             player.draw(batch);
 
         }
+        game.batch.setProjectionMatrix(hud.stage.getCamera().combined);
+
         //dibujar personajes amigos
         for (Map.Entry<String, Player> entry : friendlyPlayers.entrySet()) {
             entry.getValue().draw(batch);
@@ -408,7 +406,10 @@ public class PlayScreen implements Screen{
                     //Texture texutraStep = new Texture(texture);
                     Gdx.app.log("SocketID", "shoot : " + direction + " posx; " + x + " posy: " + y);
                     if (friendlyPlayers.get(playerId) != null) {
-                        bulletsList.add(new Bullet((int) x, (int) y, direcciones[direction] * (float) (Math.PI / 2), bullet));
+                        bulletsList.add(new Bullet((int) x, (int) y, direcciones[direction] * (float) (Math.PI / 2), bullet,playerId));
+                        music = MyGdxGame.manager.get("audio/efects/Shoot.mp3", Music.class);
+                        music.setVolume(0.3f);
+                        music.play();
                     }
 
                 } catch (JSONException e) {
@@ -444,10 +445,12 @@ public class PlayScreen implements Screen{
                 Bullet b = iterBul.next();
 
                 if (enemy.hitMe(b.getHitbox())) {
-
+                    if(b.getIdPlayer() == id){
+                        hud.addScore(10);
+                    }
                     iterBul.remove();
                     iterEnemy.remove();
-                    hud.addScore(10);
+
                 }
             }
 
