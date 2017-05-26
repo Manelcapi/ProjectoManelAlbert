@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -48,6 +49,7 @@ public class PlayScreen implements Screen{
     private MyGdxGame game;
     private TextureAtlas atlas;
     private Animation walkRight;
+    private float life = 1;
     private float timePassed = 0;
     private Music music;
     private OrthographicCamera gamecam;
@@ -139,7 +141,7 @@ public class PlayScreen implements Screen{
                 }
             }
             if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-                if (player.getX() < 608) {
+                if (player.getX() < 580) {
                     player.setPosition(player.getX() + (+200 * dt), player.getY());
                     direccion = 1;
 
@@ -204,6 +206,7 @@ public class PlayScreen implements Screen{
         handleInput(Gdx.graphics.getDeltaTime());
         hud.update(Gdx.graphics.getDeltaTime());
         checkHitsBullets();
+        checkHitsEnemy();
         //REnder game map
         renderer.render();
         if(timeSpawn >=3){
@@ -342,6 +345,20 @@ public class PlayScreen implements Screen{
                     Gdx.app.log("SocketID", "Error estableciendo nuevo jugador");
                 }
             }
+        }).on("addEnemy", new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                JSONObject data = (JSONObject) args[0];
+                try {
+
+                    int x = data.getInt("x");
+                    Gdx.app.log("SocketID", "Nuevo jugador Conectado: " + id);
+                    obtaculos.add(new Enemy( x, 500, direcciones[3] * (float) (Math.PI / 2), enemy));
+
+                } catch (JSONException e) {
+                    Gdx.app.log("SocketID", "Error estableciendo nuevo jugador");
+                }
+            }
         }).on("playerDisconnected", new Emitter.Listener() {
             @Override
             public void call(Object... args) {
@@ -454,6 +471,18 @@ public class PlayScreen implements Screen{
                 }
             }
 
+        }
+    }
+
+    public void checkHitsEnemy() {
+
+        Iterator<Enemy> iterEnemy = obtaculos.iterator();
+        while (iterEnemy.hasNext()) {
+            Enemy enemy = iterEnemy.next();
+            Rectangle hitboxPlayer= new Rectangle(player.getX(),player.getY(),33,36);
+            if(hitboxPlayer.overlaps(enemy.getHitbox())){
+                Gdx.app.log("TOCADO", "-vida");
+            }
         }
     }
 

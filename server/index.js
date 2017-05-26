@@ -47,7 +47,9 @@ io.on('connection', function(socket){
     	        }
     	    }
     	});
-
+       setInterval(function(){
+           socket.broadcast.emit('addEnemy', {x : 500});
+       }, 3000);
 	socket.on('disconnect', function(){
 		console.log("Jugador Desconectado");
 		socket.broadcast.emit('playerDisconnected',{id : socket.id});
@@ -70,4 +72,8 @@ function bullet(id, x, y ,direction){
 	this.x = x;
 	this.y = y;
 	this.direction = direction;
+}
+function addEnemy(){
+    var x = Math.floor(Math.random() * 500) + 40;
+    var y = 500;
 }

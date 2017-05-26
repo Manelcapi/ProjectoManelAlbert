@@ -25,10 +25,10 @@ public class Hud implements Disposable{
     private boolean timeUp;
     private Integer worldTimer;
     private static Integer score;
-
+    private String[] color = {"RED","ORANGE","YELLOW"};
     Label countdownLabel;
     static Label scoreLabel;
-    Label ninjaLabel;
+    static Label ninjaLabel;
 
     public Hud(SpriteBatch sb){
         worldTimer = 0;
@@ -36,7 +36,6 @@ public class Hud implements Disposable{
         timeCount = 0;
         viewport = new FitViewport(MyGdxGame.V_WIDTH, MyGdxGame.V_HEIGHT, new OrthographicCamera());
         stage = new Stage(viewport, sb);
-
         Table table = new Table();
         table.top();
         table.setFillParent(true);
@@ -54,6 +53,9 @@ public class Hud implements Disposable{
     public static void addScore(int value){
         score += value;
         scoreLabel.setText(String.format("%06d", score));
+    }
+    public static void setLife(Color x){
+        ninjaLabel =new Label("LIFE", new Label.LabelStyle(new BitmapFont(), x));
     }
     public void update(float dt){
         timeCount += dt;
