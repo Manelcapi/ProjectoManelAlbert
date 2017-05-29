@@ -3,6 +3,7 @@ var server = require('http').Server(app);
 var io = require('socket.io')(server);
 var players = [];
 var bullets = [];
+var enemy = [];
 server.listen(8080,function(){
 	console.log("Servidor esperando Conexiones");
 });
@@ -13,7 +14,6 @@ io.on('connection', function(socket){
 	socket.emit('getPlayers',players);
 	socket.emit('getBullets',bullets);
 	socket.broadcast.emit('newPlayer',{id : socket.id });
-
     /*socket.on('joinGame'. function(player){
         console.log(player.id+ ' Se ha unido al juego');
         var x = getRandomInt(10,600);
@@ -47,15 +47,19 @@ io.on('connection', function(socket){
     	        }
     	    }
     	});
-       setInterval(function(){
-           socket.broadcast.emit('addEnemy', {x : 500});
-       }, 3000);
+    	var interval = setInterval(function(){
+                        var variableX = Math.floor((Math.random() * 500) + 40);
+                         console.log("enemySpawn: "+ variableX);
+                       socket.broadcast.emit('addEnemy', {x : variableX});
+                   }, 3000);
+
 	socket.on('disconnect', function(){
 		console.log("Jugador Desconectado");
 		socket.broadcast.emit('playerDisconnected',{id : socket.id});
 		for(var i = 0; i< players.length; i++){
 		    if(players[i].id == socket.id){
 		        players.splice(i,1);
+		        clearInterval(interval);
 		    }
 		}
 	});
@@ -73,7 +77,8 @@ function bullet(id, x, y ,direction){
 	this.y = y;
 	this.direction = direction;
 }
-function addEnemy(){
-    var x = Math.floor(Math.random() * 500) + 40;
-    var y = 500;
+function enemy(){
+    this.x = x;
+    this.y = y;
+    this.direction = direction;
 }

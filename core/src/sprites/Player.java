@@ -17,6 +17,7 @@ public class Player extends Sprite{
     public Vector2 previousPosition;
     private TextureRegion ninja1;
     private Rectangle hitbox;
+    private float life = 1;
 
     public Player(PlayScreen screen){
         super(screen.getAtlas().findRegion("ninja1Down"));
@@ -28,6 +29,14 @@ public class Player extends Sprite{
 
     public Rectangle getHitbox() {
         return hitbox;
+    }
+
+    public float getLife() {
+        return life;
+    }
+
+    public void setLife(float life) {
+        this.life = life;
     }
 
     public void setHitbox(Rectangle hitbox) {

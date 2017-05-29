@@ -4,7 +4,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -66,8 +65,6 @@ public class PlayScreen implements Screen{
     SpriteBatch batch;
     Player player;
     String id;
-    Texture friendPlayer;
-    Texture mainPlayer;
     Texture bullet;
     Texture enemy;
     Map<String, Player> friendlyPlayers;
@@ -202,6 +199,7 @@ public class PlayScreen implements Screen{
         update(delta);
         Gdx.gl.glClearColor(0,0,0,1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
         updateServer(Gdx.graphics.getDeltaTime());
         handleInput(Gdx.graphics.getDeltaTime());
         hud.update(Gdx.graphics.getDeltaTime());
@@ -209,14 +207,14 @@ public class PlayScreen implements Screen{
         checkHitsEnemy();
         //REnder game map
         renderer.render();
-        if(timeSpawn >=3){
+        /*if(timeSpawn >=3){
             int randomNum = 10 + (int)(Math.random() * 500);
             obtaculos.add(new Enemy( randomNum, 500, direcciones[3] * (float) (Math.PI / 2), enemy));
             timeSpawn = 0;
         }
         else {
            timeSpawn += delta;
-        }
+        }*/
         hud.stage.draw();
         batch.begin();
 
@@ -245,6 +243,10 @@ public class PlayScreen implements Screen{
             b.update(Gdx.graphics.getDeltaTime());
         }
         deleteBullets();
+        if(player != null &&  player.getLife() < 0){
+            game.setScreen(new GameOverScreen(game));
+            dispose();
+        }
     }
 
     @Override
@@ -272,8 +274,6 @@ public class PlayScreen implements Screen{
     public void dispose() {
         map.dispose();
         renderer.dispose();
-        mainPlayer.dispose();
-        friendPlayer.dispose();
         bullet.dispose();
         enemy.dispose();
 
@@ -345,20 +345,6 @@ public class PlayScreen implements Screen{
                     Gdx.app.log("SocketID", "Error estableciendo nuevo jugador");
                 }
             }
-        }).on("addEnemy", new Emitter.Listener() {
-            @Override
-            public void call(Object... args) {
-                JSONObject data = (JSONObject) args[0];
-                try {
-
-                    int x = data.getInt("x");
-                    Gdx.app.log("SocketID", "Nuevo jugador Conectado: " + id);
-                    obtaculos.add(new Enemy( x, 500, direcciones[3] * (float) (Math.PI / 2), enemy));
-
-                } catch (JSONException e) {
-                    Gdx.app.log("SocketID", "Error estableciendo nuevo jugador");
-                }
-            }
         }).on("playerDisconnected", new Emitter.Listener() {
             @Override
             public void call(Object... args) {
@@ -391,6 +377,20 @@ public class PlayScreen implements Screen{
 
                 } catch (JSONException e) {
 
+                }
+            }
+        }).on("addEnemy", new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                JSONObject data = (JSONObject) args[0];
+                try {
+
+                    int x = data.getInt("x");
+                    Gdx.app.log("SocketID", "Nuevo jugador Conectado: " + id);
+                    obtaculos.add(new Enemy((int)x , 500, direcciones[3] * (float) (Math.PI / 2), enemy));
+
+                } catch (JSONException e) {
+                    Gdx.app.log("SocketID", "Error estableciendo nuevo jugador");
                 }
             }
         }).on("getPlayers", new Emitter.Listener() {
@@ -460,14 +460,12 @@ public class PlayScreen implements Screen{
             Iterator<Bullet> iterBul = bulletsList.iterator();
             while (iterBul.hasNext()) {
                 Bullet b = iterBul.next();
-
                 if (enemy.hitMe(b.getHitbox())) {
                     if(b.getIdPlayer() == id){
                         hud.addScore(10);
                     }
                     iterBul.remove();
                     iterEnemy.remove();
-
                 }
             }
 
@@ -481,6 +479,7 @@ public class PlayScreen implements Screen{
             Enemy enemy = iterEnemy.next();
             Rectangle hitboxPlayer= new Rectangle(player.getX(),player.getY(),33,36);
             if(hitboxPlayer.overlaps(enemy.getHitbox())){
+                player.setLife(player.getLife()- (float)0.1);
                 Gdx.app.log("TOCADO", "-vida");
             }
         }
