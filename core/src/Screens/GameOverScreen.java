@@ -20,11 +20,12 @@ import com.mygdx.game.MyGdxGame;
 public class GameOverScreen implements Screen{
     private Viewport viewport;
     private Stage stage;
-
+    private int score;
 
     private MyGdxGame game;
-    public GameOverScreen (MyGdxGame game){
+    public GameOverScreen (MyGdxGame game, int score){
         this.game = game;
+        this.score = score;
         viewport = new FillViewport(MyGdxGame.V_WIDTH,MyGdxGame.V_HEIGHT , new OrthographicCamera());
         stage = new Stage(viewport , game.batch);
 
@@ -36,10 +37,12 @@ public class GameOverScreen implements Screen{
 
         Label gameOverLabel = new Label("GAME OVER",font);
         Label playAgainLabel = new Label("Volver a jugar",font);
-
+        Label scoreLabel = new Label("Puntuacion: "+score,font);
         table.add(gameOverLabel).expandX();
         table.row();
         table.add(playAgainLabel).expandX().padTop(10f);
+        table.row();
+        table.add(scoreLabel).expandX().padTop(10f);
         stage.addActor(table);
     }
 
@@ -51,7 +54,8 @@ public class GameOverScreen implements Screen{
     @Override
     public void render(float delta) {
         if(Gdx.input.justTouched()){
-            game.setScreen(new PlayScreen(game));
+            game.setScreen(new AddPuntiacion(game,score));
+            //game.setScreen(new PlayScreen(game));
             //dispose();
         }
         Gdx.gl.glClearColor(0,0,0,1);

@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -43,11 +44,12 @@ import sprites.Player;
  * Created by cfgs on 15/05/17.
  */
 
-public class PlayScreen implements Screen{
+public class PlayScreen implements Screen {
 
     private MyGdxGame game;
     private TextureAtlas atlas;
     private Animation walkRight;
+    private Texture blank;
     private float life = 1;
     private float timePassed = 0;
     private Music music;
@@ -55,9 +57,9 @@ public class PlayScreen implements Screen{
     private Viewport gamePort;
     private Hud hud;
     private boolean disparo;
-    private final float UPDATE_TIME = 1/60f;
+    private final float UPDATE_TIME = 1 / 60f;
     private TmxMapLoader maploader;
-    private int[] direcciones = {0,1,-1,90};
+    private int[] direcciones = {0, 1, -1, 90};
     private int direccion;
     private TiledMap map;
     private OrthogonalTiledMapRenderer renderer;
@@ -78,6 +80,8 @@ public class PlayScreen implements Screen{
         //Creando conexion
         Connection conection = new Connection();
 
+        //textura de la vida
+        blank = new Texture("blank.png");
 
         atlas = new TextureAtlas("Ninja1.pack");
         bullet = new Texture("ataque.png");
@@ -91,13 +95,13 @@ public class PlayScreen implements Screen{
         gamecam = new OrthographicCamera();
         gamecam.position.x = 320;
         gamecam.position.y = 320;
-        gamePort = new FitViewport(MyGdxGame.V_WIDTH , MyGdxGame.V_HEIGHT ,gamecam);
+        gamePort = new FitViewport(MyGdxGame.V_WIDTH, MyGdxGame.V_HEIGHT, gamecam);
         hud = new Hud(game.batch);
         maploader = new TmxMapLoader();
         map = maploader.load("map1.tmx");
         cell = ((TiledMapTileLayer) (map.getLayers().get(0)));
 
-        renderer = new OrthogonalTiledMapRenderer(map, 1 );
+        renderer = new OrthogonalTiledMapRenderer(map, 1);
 
         music = MyGdxGame.manager.get("audio/music/TheSunRises.mp3", Music.class);
         music.setLooping(true);
@@ -113,7 +117,7 @@ public class PlayScreen implements Screen{
     }
 
 
-    public TextureAtlas getAtlas(){
+    public TextureAtlas getAtlas() {
         return atlas;
     }
 
@@ -169,7 +173,7 @@ public class PlayScreen implements Screen{
             if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
                 Gdx.app.log("X DISPARO", "DISPARO: " + player.getX());
                 Gdx.app.log("Y DISPARO", "DISPARO: " + player.getY());
-                bulletsList.add(new Bullet((int) player.getX(), (int) player.getY(), direcciones[direccion] * (float) (Math.PI / 2), bullet,id));
+                bulletsList.add(new Bullet((int) player.getX(), (int) player.getY(), direcciones[direccion] * (float) (Math.PI / 2), bullet, id));
                 music = MyGdxGame.manager.get("audio/efects/Shoot.mp3", Music.class);
                 music.setVolume(0.3f);
                 music.play();
@@ -197,7 +201,7 @@ public class PlayScreen implements Screen{
     @Override
     public void render(float delta) {
         update(delta);
-        Gdx.gl.glClearColor(0,0,0,1);
+        Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         updateServer(Gdx.graphics.getDeltaTime());
@@ -224,6 +228,10 @@ public class PlayScreen implements Screen{
         }
         game.batch.setProjectionMatrix(hud.stage.getCamera().combined);
 
+        //linea de vida
+
+        batch.draw(blank, 0, 0, Gdx.graphics.getWidth() * life, 5);
+
         //dibujar personajes amigos
         for (Map.Entry<String, Player> entry : friendlyPlayers.entrySet()) {
             entry.getValue().draw(batch);
@@ -243,8 +251,9 @@ public class PlayScreen implements Screen{
             b.update(Gdx.graphics.getDeltaTime());
         }
         deleteBullets();
-        if(player != null &&  player.getLife() < 0){
-            game.setScreen(new GameOverScreen(game));
+        if (player != null && player.getLife() < 0) {
+            game.setScreen(new GameOverScreen(game, hud.getScore()));
+            socket.disconnect();
             dispose();
         }
     }
@@ -316,7 +325,7 @@ public class PlayScreen implements Screen{
             public void call(Object... args) {
                 Gdx.app.log("SocketIO", "Connected");
                 player = new Player(PlayScreen.this);
-                int randomNum = 10 + (int)(Math.random() * 500);
+                int randomNum = 10 + (int) (Math.random() * 500);
 
                 player.setPosition(randomNum, 60);
             }
@@ -384,10 +393,9 @@ public class PlayScreen implements Screen{
             public void call(Object... args) {
                 JSONObject data = (JSONObject) args[0];
                 try {
-
                     int x = data.getInt("x");
-                    Gdx.app.log("SocketID", "Nuevo jugador Conectado: " + id);
-                    obtaculos.add(new Enemy((int)x , 500, direcciones[3] * (float) (Math.PI / 2), enemy));
+                    Gdx.app.log("ADD Enemy", "Nuevo Enemigo ");
+                    obtaculos.add(new Enemy((int) x, 500, direcciones[3] * (float) (Math.PI / 2), enemy));
 
                 } catch (JSONException e) {
                     Gdx.app.log("SocketID", "Error estableciendo nuevo jugador");
@@ -423,7 +431,7 @@ public class PlayScreen implements Screen{
                     //Texture texutraStep = new Texture(texture);
                     Gdx.app.log("SocketID", "shoot : " + direction + " posx; " + x + " posy: " + y);
                     if (friendlyPlayers.get(playerId) != null) {
-                        bulletsList.add(new Bullet((int) x, (int) y, direcciones[direction] * (float) (Math.PI / 2), bullet,playerId));
+                        bulletsList.add(new Bullet((int) x, (int) y, direcciones[direction] * (float) (Math.PI / 2), bullet, playerId));
                         music = MyGdxGame.manager.get("audio/efects/Shoot.mp3", Music.class);
                         music.setVolume(0.3f);
                         music.play();
@@ -461,7 +469,7 @@ public class PlayScreen implements Screen{
             while (iterBul.hasNext()) {
                 Bullet b = iterBul.next();
                 if (enemy.hitMe(b.getHitbox())) {
-                    if(b.getIdPlayer() == id){
+                    if (b.getIdPlayer() == id) {
                         hud.addScore(10);
                     }
                     iterBul.remove();
@@ -477,9 +485,11 @@ public class PlayScreen implements Screen{
         Iterator<Enemy> iterEnemy = obtaculos.iterator();
         while (iterEnemy.hasNext()) {
             Enemy enemy = iterEnemy.next();
-            Rectangle hitboxPlayer= new Rectangle(player.getX(),player.getY(),33,36);
-            if(hitboxPlayer.overlaps(enemy.getHitbox())){
-                player.setLife(player.getLife()- (float)0.1);
+            Rectangle hitboxPlayer = new Rectangle(player.getX(), player.getY(), 33, 36);
+            if (hitboxPlayer.overlaps(enemy.getHitbox())) {
+                player.setLife(player.getLife() - (float) 0.1);
+                life = player.getLife();
+                iterEnemy.remove();
                 Gdx.app.log("TOCADO", "-vida");
             }
         }
@@ -491,7 +501,7 @@ public class PlayScreen implements Screen{
         Iterator<Bullet> iterBul = bulletsList.iterator();
         while (iterBul.hasNext()) {
             Bullet b = iterBul.next();
-            if(b.getHitbox().getX() > 650 || b.getHitbox().getX() < 0 || b.getHitbox().getY()> 650 || b.getHitbox().getY()< 0){
+            if (b.getHitbox().getX() > 650 || b.getHitbox().getX() < 0 || b.getHitbox().getY() > 650 || b.getHitbox().getY() < 0) {
                 iterBul.remove();
             }
         }

@@ -3,6 +3,7 @@ package Scenes;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -25,10 +26,10 @@ public class Hud implements Disposable{
     private boolean timeUp;
     private Integer worldTimer;
     private static Integer score;
+    private Texture heart;
     private String[] color = {"RED","ORANGE","YELLOW"};
     Label countdownLabel;
     static Label scoreLabel;
-    static Label ninjaLabel;
 
     public Hud(SpriteBatch sb){
         worldTimer = 0;
@@ -39,12 +40,10 @@ public class Hud implements Disposable{
         Table table = new Table();
         table.top();
         table.setFillParent(true);
-
+        heart = new Texture("heart.png");
         countdownLabel = new Label(String.format("%03d", worldTimer), new Label.LabelStyle(new BitmapFont(), Color.WHITE));
         scoreLabel = new Label(String.format("%06d", score), new Label.LabelStyle(new BitmapFont(), Color.WHITE));
-        ninjaLabel = new Label("LIFE", new Label.LabelStyle(new BitmapFont(), Color.WHITE));
 
-        table.add(ninjaLabel).expandX().padTop(10);
         table.add(scoreLabel).expandX().padTop(10);
         table.add(countdownLabel).expandX().padTop(10);
 
@@ -53,9 +52,6 @@ public class Hud implements Disposable{
     public static void addScore(int value){
         score += value;
         scoreLabel.setText(String.format("%06d", score));
-    }
-    public static void setLife(Color x){
-        ninjaLabel =new Label("LIFE", new Label.LabelStyle(new BitmapFont(), x));
     }
     public void update(float dt){
         timeCount += dt;

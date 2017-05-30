@@ -8,6 +8,8 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.mygdx.game.MyGdxGame;
 
+import java.io.IOException;
+
 /**
  * Created by Manelcapi on 23/05/2017.
  */
@@ -57,6 +59,7 @@ public class MainMenu implements Screen {
             if(Gdx.input.isTouched()){
                 music.stop();
                 game.setScreen(new PlayScreen(game));
+                //dispose();
             }
         }else
             game.batch.draw(playButtonUnpres,x,PLAY_BUTTON_Y ,PLAY_BUTTON_WIDTH, PLAY_BUTTON_HEIGHT);
@@ -69,6 +72,9 @@ public class MainMenu implements Screen {
         }else
             game.batch.draw(exitButtonUnpres,xExit,EXIT_BUTTON_Y ,PLAY_BUTTON_WIDTH, PLAY_BUTTON_HEIGHT);
 
+        if(Gdx.input.justTouched()){
+                //game.setScreen(new Puntuacion(game));
+        }
 
 
         game.batch.end();

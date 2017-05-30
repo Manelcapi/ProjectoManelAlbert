@@ -48,10 +48,10 @@ io.on('connection', function(socket){
     	    }
     	});
     	var interval = setInterval(function(){
-                        var variableX = Math.floor((Math.random() * 500) + 40);
-                         console.log("enemySpawn: "+ variableX);
-                       socket.broadcast.emit('addEnemy', {x : variableX});
-                   }, 3000);
+              var variableX = Math.floor((Math.random() * 500) + 40);
+              console.log("enemySpawn: "+ variableX);
+              socket.emit('addEnemy', {x : variableX});
+              }, 100);
 
 	socket.on('disconnect', function(){
 		console.log("Jugador Desconectado");
