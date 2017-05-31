@@ -4,7 +4,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -95,14 +94,15 @@ public class PlayScreen implements Screen {
        atlas = new TextureAtlas("NinjaDown.pack");
         Array<TextureRegion> frames = new Array<TextureRegion>();
         stateTimer = 0;
-        /*for (int i = 0; i < 3; i++)
-            frames.add(new TextureRegion(this.getTexture(), i * 35, 0, 32 , 37));
-        playerDown = new Animation(0.1f, frames);
-        frames.clear();*/
+
+        enemy = new Texture("ninja2.png");
+        bullet = new Texture("ataque.png");
 
         //Creacion jugadores
         batch = new SpriteBatch();
         friendlyPlayers = new HashMap<String, Player>();
+
+
 
         this.game = game;
         gamecam = new OrthographicCamera();
@@ -141,8 +141,8 @@ public class PlayScreen implements Screen {
 
     public void handleInput(float dt) {
         if (player != null) {
-            //boolean x = cell.getCell((int) player.getX() * 20 / MyGdxGame.V_WIDTH, (int) player.getY() * 20 / MyGdxGame.V_HEIGHT).getTile().getProperties().containsKey
-            //("blocked");
+            TextureRegion region;
+
             float previousPositionX = player.getX();
             float previousPositionY = player.getY();
 
@@ -410,7 +410,6 @@ public class PlayScreen implements Screen {
                     int x = data.getInt("x");
                     Gdx.app.log("ADD Enemy", "Nuevo Enemigo ");
                     obtaculos.add(new Enemy((int) x, 500, direcciones[3] * (float) (Math.PI / 2), enemy));
-
                 } catch (JSONException e) {
                     Gdx.app.log("SocketID", "Error estableciendo nuevo jugador");
                 }
