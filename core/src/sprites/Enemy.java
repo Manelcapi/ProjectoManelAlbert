@@ -2,6 +2,7 @@ package sprites;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -87,6 +88,7 @@ public class Enemy extends Sprite{
         super.draw(batch);
         batch.draw(texture,hitbox.x,hitbox.y,30,30);
     }
+
     public boolean hitMe(Rectangle hitbox) {
         return this.hitbox.overlaps(hitbox);
     }
