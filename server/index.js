@@ -24,13 +24,13 @@ io.on('connection', function(socket){
 	socket.on('playerMoved',function(data){
 	    data.id = socket.id;
 	    socket.broadcast.emit('playerMoved',data);
-	    console.log("playerMoved: "+ "ID: "+data.id+ " X: "+data.x + " Y: "+data.y+ " textura: "+data.texture);
+	    console.log("playerMoved: "+ "ID: "+data.id+ " X: "+data.x + " Y: "+data.y+ " direccion: "+data.direction);
 
 	    for (var i = 0; i< players.length ; i++){
 	        if(players[i].id== data.id){
 	            players[i].x = data.x;
 	            players[i].y = data.y;
-	            players[i].texture = data.texture;
+	            players[i].direction = data.direction;
 	        }
 	    }
 	});
