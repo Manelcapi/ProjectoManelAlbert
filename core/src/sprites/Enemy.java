@@ -12,6 +12,8 @@ import Tools.Colision;
 import Screens.PlayScreen;
 import Tools.Colision;
 
+import static java.lang.Math.sqrt;
+
 
 /**
  * Created by cfgs on 15/05/17.
@@ -33,7 +35,7 @@ public class Enemy extends Sprite{
 
     public Enemy (int x,int y ,float angle, Texture texture) {
         time = 2;
-        speed = 10;
+        speed = 1;
         hitbox = new Rectangle(x,y,30,30);
         this.texture = texture;
         a = angle;
@@ -43,9 +45,14 @@ public class Enemy extends Sprite{
         return hitbox;
     }
 
-    public void update(float delta) {
-        hitbox.x += speed * (float)Math.sin(a)*delta;
-        hitbox.y += speed * (float)Math.cos(a)*delta;
+    public void update(float delta , float x, float y) {
+        float xe = x - hitbox.x;
+        float ye = y - hitbox.y;
+        float hyp = (float) sqrt(xe*xe + ye*ye);
+        xe /= hyp;
+        ye /= hyp;
+        hitbox.x += speed * xe;//(float)Math.sin(a)*delta;
+        hitbox.y += speed * ye;//(float)Math.cos(a)*delta;
         time -= delta;
     }
 

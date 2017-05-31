@@ -51,7 +51,7 @@ io.on('connection', function(socket){
               var variableX = Math.floor((Math.random() * 500) + 40);
               console.log("enemySpawn: "+ variableX);
               socket.emit('addEnemy', {x : variableX});
-              }, 100);
+              }, 2000);
 
 	socket.on('disconnect', function(){
 		console.log("Jugador Desconectado");
