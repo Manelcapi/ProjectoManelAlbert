@@ -40,6 +40,8 @@ import sprites.Bullet;
 import sprites.Enemy;
 import sprites.Player;
 
+import static java.lang.Math.sqrt;
+
 /**
  * Created by cfgs on 15/05/17.
  */
@@ -236,14 +238,6 @@ public class PlayScreen implements Screen {
         checkHitsEnemy();
         //REnder game map
         renderer.render();
-        /*if(timeSpawn >=3){
-            int randomNum = 10 + (int)(Math.random() * 500);
-            obtaculos.add(new Enemy( randomNum, 500, direcciones[3] * (float) (Math.PI / 2), enemy));
-            timeSpawn = 0;
-        }
-        else {
-           timeSpawn += delta;
-        }*/
         hud.stage.draw();
         batch.begin();
 
@@ -272,13 +266,27 @@ public class PlayScreen implements Screen {
             b.update(Gdx.graphics.getDeltaTime());
         }
         for (Enemy b : obtaculos) {
-            b.update(Gdx.graphics.getDeltaTime());
+
+                for (Map.Entry<String, Player> entry : friendlyPlayers.entrySet()) {
+                    float xjugador = player.getX() - b.getX();
+                    float yjugador = player.getY() - b.getY();
+                    float xOtroJuagador = entry.getValue().getX() - b.getX();
+                    float yOtroJuagador = entry.getValue().getY() - b.getY();
+                    float hypOtroJugador = (float) sqrt(xOtroJuagador*xOtroJuagador + yOtroJuagador*yOtroJuagador);
+                    float hypJugadorPrincipal = (float) sqrt(xjugador*xjugador + yjugador*yjugador);
+                    if(hypJugadorPrincipal-hypOtroJugador > 0)
+                        b.update(Gdx.graphics.getDeltaTime(),entry.getValue().getX(),entry.getValue().getY());
+                    else if(hypJugadorPrincipal - hypOtroJugador <0)
+                        b.update(Gdx.graphics.getDeltaTime(),player.getX(),player.getY());
+            }
+
         }
         deleteBullets();
         if (player != null && player.getLife() < 0) {
             game.setScreen(new GameOverScreen(game, hud.getScore()));
             socket.disconnect();
             dispose();
+
         }
     }
 
