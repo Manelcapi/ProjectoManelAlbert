@@ -3,7 +3,6 @@ package sprites;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
@@ -17,15 +16,11 @@ import Screens.PlayScreen;
 
 public class Player extends Sprite{
 
-    public enum State{UP, DOWN, RIGHT, LEFT};
-    public State currentState;
-    public State previousState;
     public Vector2 previousPosition;
     private TextureRegion ninja1;
     private Rectangle hitbox;
     private float life = 1;
 
-    private TextureAtlas atlas;
 
     private Animation playerUp;
     private Animation playerDown;
@@ -35,8 +30,6 @@ public class Player extends Sprite{
     public Player(PlayScreen screen){
         super(screen.getAtlas().findRegion("n1down0"));
         previousPosition = new Vector2(getX(),getY());
-        currentState = State.DOWN;
-        previousState = State.DOWN;
         ninja1 = new TextureRegion(getTexture(), 109, 2, 33,36);
         hitbox = new Rectangle(this.getX(),this.getY(),33,36);
 

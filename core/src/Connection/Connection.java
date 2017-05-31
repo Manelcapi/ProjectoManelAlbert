@@ -17,7 +17,7 @@ public class Connection {
 
     public Socket connectSocket(){
         try {
-            socket = IO.socket("http://localhost:8080");
+            socket = IO.socket("http://192.168.2.36:8080");
             socket.connect();
         }catch (Exception e){
             System.out.print(e);
