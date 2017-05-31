@@ -10,12 +10,12 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.FileTextureData;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
@@ -45,8 +45,6 @@ public class PlayScreen implements Screen{
 
     private MyGdxGame game;
     private TextureAtlas atlas;
-    private Animation walkRight;
-    private float timePassed = 0;
 
     private Music music;
 
@@ -58,6 +56,11 @@ public class PlayScreen implements Screen{
     private TiledMap map;
     private OrthogonalTiledMapRenderer renderer;
 
+    private Animation playerUp;
+    private Animation playerDown;
+    private Animation playerRight;
+    private Animation playerLeft;
+    private float stateTimer;
 
     float timer;
     SpriteBatch batch;
@@ -68,13 +71,17 @@ public class PlayScreen implements Screen{
     Map<String, Player> friendlyPlayers;
     TiledMapTileLayer cell ;
     ArrayList<Bullet> bulletsList = new ArrayList<Bullet>();
-    ArrayList<Rectangle> obtaculos = new ArrayList<Rectangle>();
     private Socket socket;
 
     public PlayScreen(MyGdxGame game){
 
-        atlas = new TextureAtlas("Ninja1.pack");
-        walkRight = new Animation(1/60f,atlas.getRegions());
+       atlas = new TextureAtlas("NinjaDown.pack");
+        Array<TextureRegion> frames = new Array<TextureRegion>();
+        stateTimer = 0;
+        /*for (int i = 0; i < 3; i++)
+            frames.add(new TextureRegion(this.getTexture(), i * 35, 0, 32 , 37));
+        playerDown = new Animation(0.1f, frames);
+        frames.clear();*/
 
         //Creacion jugadores
         batch = new SpriteBatch();
@@ -100,8 +107,6 @@ public class PlayScreen implements Screen{
         music.setVolume(0.3f);
         music.play();
         getRectangles();
-        //player = new Player(world, this);
-
         connectSocket();
         configSocketEvents();
 
@@ -114,6 +119,7 @@ public class PlayScreen implements Screen{
         return atlas;
     }
 
+
     @Override
     public void show() {
 
@@ -121,6 +127,7 @@ public class PlayScreen implements Screen{
 
     public void handleInput(float dt){
         if(player != null){
+            TextureRegion region;
             boolean x = cell.getCell((int)player.getX()*20/MyGdxGame.V_WIDTH,(int)player.getY()*20/MyGdxGame.V_HEIGHT).getTile().getProperties().containsKey
                     ("blocked");
             float previousPositionX = player.getX();
@@ -128,27 +135,15 @@ public class PlayScreen implements Screen{
 
             if(Gdx.input.isKeyPressed(Input.Keys.LEFT)){
                 if(player.getX()>32){
-                    player.setPosition(player.getX()+(-100*dt),player.getY());
+                    player.setPosition(player.getX()+(-200*dt),player.getY());
                 }else{
                     player.setPosition(previousPositionX,previousPositionY);
                     Gdx.app.log("Toque izquierda","data");
                 }
 
             }if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)){
-
-                Array<Rectangle> tiles = getTiles((int)(player.getX()/32 + 1), (int)(player.getY()/32 - 1),
-                        (int)(player.getX()/32 + 1), (int)(player.getY()/32 + 1));
-
-                for (Rectangle tile : tiles) {
-
-                    if(player.getHitbox().overlaps(tile)) {
-                        Gdx.app.log("overlap right","data");
-                        player.setPosition(tile.x - player.getWidth() , player.getY());
-                    }
-                }
-
                 if(player.getX()< 589){
-                    player.setPosition(player.getX()+(+100*dt),player.getY());
+                    player.setPosition(player.getX()+(+200*dt),player.getY());
                 }else{
                     player.setPosition(previousPositionX,previousPositionY);
                     Gdx.app.log("Toque derecha","data");
@@ -156,15 +151,19 @@ public class PlayScreen implements Screen{
 
             }if(Gdx.input.isKeyPressed(Input.Keys.UP)){
                 if(player.getY()< 448){
-                    player.setPosition(player.getX(),player.getY()+(+100*dt));
+                    player.setPosition(player.getX(),player.getY()+(+200*dt));
                 }else{
                     player.setPosition(previousPositionX,previousPositionY);
                     Gdx.app.log("Toque arriba","data");
                 }
 
             }if(Gdx.input.isKeyPressed(Input.Keys.DOWN)){
-                if(player.getY()>50){
-                    player.setPosition(player.getX(),player.getY()+(-100*dt));
+                if(player.getY()>50) {
+                    stateTimer += dt;
+                    region = (TextureRegion) player.getADown().getKeyFrame(stateTimer);
+                    player.setRegion(region);
+                    player.setPosition(player.getX(), player.getY() + (-200 * dt));
+
                 }else{
                     player.setPosition(previousPositionX,previousPositionY);
                     Gdx.app.log("Toque abajo","data");
@@ -176,7 +175,6 @@ public class PlayScreen implements Screen{
 
     public void update(float dt){
 
-        handleInput(dt);
         if(player != null){
             player.update(dt);
         }
@@ -197,13 +195,13 @@ public class PlayScreen implements Screen{
 
         //REnder game map
         renderer.render();
-
          game.batch.setProjectionMatrix(hud.stage.getCamera().combined);
         hud.stage.draw();
         batch.begin();
 
         if(player != null){
             player.draw(batch);
+
 
         }
         for(Map.Entry<String, Player> entry : friendlyPlayers.entrySet()){
@@ -360,20 +358,5 @@ public class PlayScreen implements Screen{
                 }
             }
         });
-    }
-
-    private Array<Rectangle> getTiles(int startX, int startY, int endX, int endY) {
-        TiledMapTileLayer layer = (TiledMapTileLayer)map.getLayers().get(0);
-        Array<Rectangle> rectangles = new Array<Rectangle>();
-        for (int x = startX; x <= endX; x++) {
-            for (int y = startY; y <= endY; y++) {
-                TiledMapTileLayer.Cell cell = layer.getCell(x, y);
-                if(cell != null) {
-                    Rectangle rect = new Rectangle(x*32, y*32, 32, 32);
-                    rectangles.add(rect);
-                }
-            }
-        }
-        return rectangles;
     }
 }
