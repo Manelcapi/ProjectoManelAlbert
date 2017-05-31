@@ -3,6 +3,7 @@ package sprites;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
@@ -24,24 +25,53 @@ public class Player extends Sprite{
     private Rectangle hitbox;
     private float life = 1;
 
+    private TextureAtlas atlas;
+
     private Animation playerUp;
     private Animation playerDown;
     private Animation playerRight;
     private Animation playerLeft;
 
     public Player(PlayScreen screen){
-        super(screen.getAtlas().findRegion("ninja1Down"));
+        super(screen.getAtlas().findRegion("n1down0"));
         previousPosition = new Vector2(getX(),getY());
         currentState = State.DOWN;
         previousState = State.DOWN;
-        ninja1 = new TextureRegion(getTexture(), 35, 2, 33,36);
+        ninja1 = new TextureRegion(getTexture(), 109, 2, 33,36);
         hitbox = new Rectangle(this.getX(),this.getY(),33,36);
 
         Array<TextureRegion> frames = new Array<TextureRegion>();
-        for (int i = 0; i < 3; i++)
-            frames.add(new TextureRegion(this.getTexture(), i * 35, 0, 32 , 37));
+        //Animacion hacia abajo
+        frames.add(new TextureRegion(this.getTexture(), 109, 2, 33 , 36));
+        frames.add(new TextureRegion(this.getTexture(), 144, 1, 32 , 37));
+        frames.add(new TextureRegion(this.getTexture(), 212, 2, 32 , 37));
         playerDown = new Animation(0.1f, frames);
         playerDown.setPlayMode(Animation.PlayMode.LOOP);
+        frames.clear();
+
+        //Animacion hacia arriba
+        frames.add(new TextureRegion(this.getTexture(), 73, 2, 34 , 36));
+        frames.add(new TextureRegion(this.getTexture(), 178, 2, 32 , 36));
+        frames.add(new TextureRegion(this.getTexture(), 314, 2, 32 , 36));
+        playerUp = new Animation(0.1f, frames);
+        playerUp.setPlayMode(Animation.PlayMode.LOOP);
+        frames.clear();
+
+        //Animacion hacia la derecha
+        frames.add(new TextureRegion(this.getTexture(), 37, 2, 34 , 36));
+        frames.add(new TextureRegion(this.getTexture(), 280, 2, 32 , 36));
+        frames.add(new TextureRegion(this.getTexture(), 246, 2, 32 , 36));
+        playerRight = new Animation(0.1f, frames);
+        playerRight.setPlayMode(Animation.PlayMode.LOOP);
+        frames.clear();
+
+        //Animacion hacia la izquierda
+        frames.add(new TextureRegion(this.getTexture(), 1, 2, 34 , 36));
+        frames.add(new TextureRegion(this.getTexture(), 348, 3, 32 , 35));
+        frames.add(new TextureRegion(this.getTexture(), 382, 3, 32 , 35));
+        playerLeft = new Animation(0.1f, frames);
+        playerLeft.setPlayMode(Animation.PlayMode.LOOP);
+        frames.clear();
 
         setRegion(ninja1);
     }
@@ -52,6 +82,18 @@ public class Player extends Sprite{
 
     public Animation getADown(){
         return playerDown;
+    }
+
+    public Animation getAUp(){
+        return playerUp;
+    }
+
+    public Animation getARight(){
+        return playerRight;
+    }
+
+    public Animation getALeft(){
+        return playerLeft;
     }
 
     public float getLife() {

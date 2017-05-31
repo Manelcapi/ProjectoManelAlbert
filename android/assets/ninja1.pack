@@ -1,0 +1,89 @@
+
+ninja1.png
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+n1left0
+  rotate: false
+  xy: 1, 2
+  size: 34, 36
+  orig: 34, 36
+  offset: 0, 0
+  index: -1
+n1right0
+  rotate: false
+  xy: 37, 2
+  size: 34, 36
+  orig: 34, 36
+  offset: 0, 0
+  index: -1
+n1up0
+  rotate: false
+  xy: 73, 2
+  size: 34, 36
+  orig: 34, 36
+  offset: 0, 0
+  index: -1
+n1down0
+  rotate: false
+  xy: 109, 2
+  size: 33, 36
+  orig: 33, 36
+  offset: 0, 0
+  index: -1
+n1down1
+  rotate: false
+  xy: 144, 1
+  size: 32, 37
+  orig: 32, 37
+  offset: 0, 0
+  index: -1
+n1up1
+  rotate: false
+  xy: 178, 2
+  size: 32, 36
+  orig: 32, 36
+  offset: 0, 0
+  index: -1
+n1down2
+  rotate: false
+  xy: 212, 2
+  size: 32, 36
+  orig: 32, 36
+  offset: 0, 0
+  index: -1
+n1right2
+  rotate: false
+  xy: 246, 2
+  size: 32, 36
+  orig: 32, 36
+  offset: 0, 0
+  index: -1
+n1right1
+  rotate: false
+  xy: 280, 2
+  size: 32, 36
+  orig: 32, 36
+  offset: 0, 0
+  index: -1
+n1up2
+  rotate: false
+  xy: 314, 2
+  size: 32, 36
+  orig: 32, 36
+  offset: 0, 0
+  index: -1
+n1left1
+  rotate: false
+  xy: 348, 3
+  size: 32, 35
+  orig: 32, 35
+  offset: 0, 0
+  index: -1
+n1left2
+  rotate: false
+  xy: 382, 3
+  size: 32, 35
+  orig: 32, 35
+  offset: 0, 0
+  index: -1

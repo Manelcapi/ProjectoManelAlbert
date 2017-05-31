@@ -91,11 +91,11 @@ public class PlayScreen implements Screen {
         //textura de la vida
         blank = new Texture("blank.png");
 
-       atlas = new TextureAtlas("NinjaDown.pack");
+       atlas = new TextureAtlas("ninja1.pack");
         Array<TextureRegion> frames = new Array<TextureRegion>();
         stateTimer = 0;
 
-        enemy = new Texture("ninja2.png");
+        enemy = new Texture("limo1.png");
         bullet = new Texture("ataque.png");
 
         //Creacion jugadores
@@ -148,6 +148,9 @@ public class PlayScreen implements Screen {
 
             if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
                 if (player.getX() > 32) {
+                    stateTimer += dt;
+                    region = (TextureRegion) player.getALeft().getKeyFrame(stateTimer);
+                    player.setRegion(region);
                     player.setPosition(player.getX() + (-200 * dt), player.getY());
                     direccion = 2;
                 } else {
@@ -156,6 +159,9 @@ public class PlayScreen implements Screen {
             }
             if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
                 if (player.getX() < 580) {
+                    stateTimer += dt;
+                    region = (TextureRegion) player.getARight().getKeyFrame(stateTimer);
+                    player.setRegion(region);
                     player.setPosition(player.getX() + (+200 * dt), player.getY());
                     direccion = 1;
 
@@ -165,6 +171,9 @@ public class PlayScreen implements Screen {
             }
             if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
                 if (player.getY() < 608) {
+                    stateTimer += dt;
+                    region = (TextureRegion) player.getAUp().getKeyFrame(stateTimer);
+                    player.setRegion(region);
                     player.setPosition(player.getX(), player.getY() + (+200 * dt));
                     direccion = 0;
                 } else {
@@ -177,6 +186,7 @@ public class PlayScreen implements Screen {
                     region = (TextureRegion) player.getADown().getKeyFrame(stateTimer);
                     player.setRegion(region);
                     player.setPosition(player.getX(), player.getY() + (-200 * dt));
+                    direccion = 3;
 
                 }else{
                     player.setPosition(previousPositionX,previousPositionY);
