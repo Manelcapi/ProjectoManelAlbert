@@ -11,9 +11,7 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.graphics.glutils.FileTextureData;
 import com.badlogic.gdx.maps.tiled.TiledMap;
-import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Rectangle;
@@ -56,6 +54,7 @@ public class PlayScreen implements Screen {
     private float timePassed = 0;
 
     private Music music;
+    private Music shootsound;
     private OrthographicCamera gamecam;
     private Viewport gamePort;
     private Hud hud;
@@ -203,9 +202,9 @@ public class PlayScreen implements Screen {
                 Gdx.app.log("X DISPARO", "DISPARO: " + player.getX());
                 Gdx.app.log("Y DISPARO", "DISPARO: " + player.getY());
                 bulletsList.add(new Bullet((int) player.getX(), (int) player.getY(), direcciones[direccion] * (float) (Math.PI / 2), bullet, id));
-                music = MyGdxGame.manager.get("audio/efects/Shoot.mp3", Music.class);
-                music.setVolume(0.3f);
-                music.play();
+                shootsound = MyGdxGame.manager.get("audio/efects/Shoot.mp3", Music.class);
+                shootsound.setVolume(0.3f);
+                shootsound.play();
                 disparo = true;
                 //UPDATESERVER PARA ENVIAR EL DISPARO A LOS DEMAS CLIENTES
                 updateServer(Gdx.graphics.getDeltaTime());
@@ -268,6 +267,9 @@ public class PlayScreen implements Screen {
             b.update(Gdx.graphics.getDeltaTime());
         }
         for (Enemy b : obtaculos) {
+        if(friendlyPlayers.isEmpty()){
+            b.update(Gdx.graphics.getDeltaTime(), player.getX(), player.getY());
+        }else{
 
             for (Map.Entry<String, Player> entry : friendlyPlayers.entrySet()) {
                 float xjugador = player.getX() - b.getX();
@@ -281,10 +283,12 @@ public class PlayScreen implements Screen {
                 else if (hypJugadorPrincipal - hypOtroJugador < 0)
                     b.update(Gdx.graphics.getDeltaTime(), player.getX(), player.getY());
             }
+        }
 
         }
         deleteBullets();
         if (player != null && player.getLife() < 0) {
+            music.stop();
             game.setScreen(new GameOverScreen(game, hud.getScore()));
             socket.disconnect();
             dispose();
@@ -508,13 +512,16 @@ public class PlayScreen implements Screen {
                     if (b.getIdPlayer() == id) {
                         hud.addScore(10);
                     }
+                    int i=0;
+                    for (i = 0; i < 6; i++){
+                        stateTimer += Gdx.graphics.getDeltaTime();
+                        region = (TextureRegion) enemy.getExplosion().getKeyFrame(stateTimer);
+                        enemy.setRegion(region);
+                    }
 
-                    stateTimer += Gdx.graphics.getDeltaTime();
-                    region = (TextureRegion) enemy.getExplosion().getKeyFrame(stateTimer);
-                    enemy.setRegion(region);
 
                     iterBul.remove();
-                    //iterEnemy.remove();
+                    iterEnemy.remove();
 
 
 
@@ -541,7 +548,6 @@ public class PlayScreen implements Screen {
 
     //borra las balas que sobresalen del mapa
     public void deleteBullets() {
-
         Iterator<Bullet> iterBul = bulletsList.iterator();
         while (iterBul.hasNext()) {
             Bullet b = iterBul.next();
@@ -549,8 +555,5 @@ public class PlayScreen implements Screen {
                 iterBul.remove();
             }
         }
-
-
     }
-
 }
