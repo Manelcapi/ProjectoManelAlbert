@@ -72,7 +72,7 @@ public class PlayScreen implements Screen {
     private Animation playerRight;
     private Animation playerLeft;
     private float stateTimer;
-
+    private TextureAtlas atlasExplosion;
     float timer;
     SpriteBatch batch;
     Player player;
@@ -105,6 +105,7 @@ public class PlayScreen implements Screen {
         friendlyPlayers = new HashMap<String, Player>();
 
 
+        atlasExplosion = new TextureAtlas("explosion.pack");
 
         this.game = game;
         gamecam = new OrthographicCamera();
@@ -134,6 +135,10 @@ public class PlayScreen implements Screen {
 
     public TextureAtlas getAtlas() {
         return atlas;
+    }
+
+    public TextureAtlas getAtlasEx() {
+        return atlasExplosion;
     }
 
     @Override
@@ -427,7 +432,7 @@ public class PlayScreen implements Screen {
                 try {
                     int x = data.getInt("x");
                     Gdx.app.log("ADD Enemy", "Nuevo Enemigo ");
-                    obtaculos.add(new Enemy((int) x, 500, direcciones[3] * (float) (Math.PI / 2), enemy));
+                    obtaculos.add(new Enemy((int) x, 500, direcciones[3] * (float) (Math.PI / 2), enemy,PlayScreen.this));
                 } catch (JSONException e) {
                     Gdx.app.log("SocketID", "Error estableciendo nuevo jugador");
                 }
@@ -493,6 +498,8 @@ public class PlayScreen implements Screen {
     //Chekea si la vala a dado a un enemigo
     public void checkHitsBullets() {
 
+        TextureRegion region;
+
         Iterator<Enemy> iterEnemy = obtaculos.iterator();
         while (iterEnemy.hasNext()) {
             Enemy enemy = iterEnemy.next();
@@ -503,8 +510,16 @@ public class PlayScreen implements Screen {
                     if (b.getIdPlayer() == id) {
                         hud.addScore(10);
                     }
+
+                    stateTimer += Gdx.graphics.getDeltaTime();
+                    region = (TextureRegion) enemy.getExplosion().getKeyFrame(stateTimer);
+                    enemy.setRegion(region);
+
                     iterBul.remove();
-                    iterEnemy.remove();
+                    //iterEnemy.remove();
+
+
+
                 }
             }
 

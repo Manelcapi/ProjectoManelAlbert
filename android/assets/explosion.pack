@@ -1,0 +1,47 @@
+
+explosion.png
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+Ex5
+  rotate: false
+  xy: 1, 1
+  size: 32, 68
+  orig: 32, 68
+  offset: 0, 0
+  index: -1
+Ex4
+  rotate: false
+  xy: 35, 4
+  size: 32, 65
+  orig: 32, 65
+  offset: 0, 0
+  index: -1
+Ex3
+  rotate: false
+  xy: 69, 5
+  size: 32, 64
+  orig: 32, 64
+  offset: 0, 0
+  index: -1
+Ex1
+  rotate: false
+  xy: 103, 8
+  size: 34, 61
+  orig: 34, 61
+  offset: 0, 0
+  index: -1
+Ex0
+  rotate: false
+  xy: 139, 8
+  size: 32, 61
+  orig: 32, 61
+  offset: 0, 0
+  index: -1
+Ex2
+  rotate: false
+  xy: 173, 6
+  size: 31, 63
+  orig: 31, 63
+  offset: 0, 0
+  index: -1
