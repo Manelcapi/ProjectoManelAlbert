@@ -1,0 +1,26 @@
+
+NinjaDown.png
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+ninja1DownStep1
+  rotate: false
+  xy: 1, 1
+  size: 32, 37
+  orig: 32, 37
+  offset: 0, 0
+  index: -1
+ninja1Down
+  rotate: false
+  xy: 35, 2
+  size: 33, 36
+  orig: 33, 36
+  offset: 0, 0
+  index: -1
+ninja1DownStep2
+  rotate: false
+  xy: 70, 2
+  size: 32, 36
+  orig: 32, 36
+  offset: 0, 0
+  index: -1

@@ -4,13 +4,13 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.FileTextureData;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
@@ -40,6 +40,8 @@ import sprites.Bullet;
 import sprites.Enemy;
 import sprites.Player;
 
+import static java.lang.Math.sqrt;
+
 /**
  * Created by cfgs on 15/05/17.
  */
@@ -52,6 +54,7 @@ public class PlayScreen implements Screen {
     private Texture blank;
     private float life = 1;
     private float timePassed = 0;
+
     private Music music;
     private OrthographicCamera gamecam;
     private Viewport gamePort;
@@ -63,6 +66,12 @@ public class PlayScreen implements Screen {
     private int direccion;
     private TiledMap map;
     private OrthogonalTiledMapRenderer renderer;
+
+    private float stateTimer;
+    private TextureAtlas atlasExplosion;
+    private TextureRegion region;
+    private TextureRegion regionPlayers;
+
     float timer;
     SpriteBatch batch;
     Player player;
@@ -70,39 +79,46 @@ public class PlayScreen implements Screen {
     Texture bullet;
     Texture enemy;
     Map<String, Player> friendlyPlayers;
-    TiledMapTileLayer cell;
     ArrayList<Bullet> bulletsList = new ArrayList<Bullet>();
     ArrayList<Enemy> obtaculos = new ArrayList<Enemy>();
     private Socket socket;
     private float timeSpawn;
 
     public PlayScreen(MyGdxGame game) {
+        this.game = game;
         //Creando conexion
         Connection conection = new Connection();
 
         //textura de la vida
         blank = new Texture("blank.png");
 
-        atlas = new TextureAtlas("Ninja1.pack");
+        atlas = new TextureAtlas("ninja1.pack");
+        Array<TextureRegion> frames = new Array<TextureRegion>();
+        stateTimer = 0;
+
+        enemy = new Texture("limo1.png");
         bullet = new Texture("ataque.png");
-        enemy = new Texture("ninja1.png");
-        walkRight = new Animation(1 / 60f, atlas.getRegions());
 
         //Creacion jugadores
         batch = new SpriteBatch();
         friendlyPlayers = new HashMap<String, Player>();
-        this.game = game;
+
+        //Parametros para la camara
+
+        atlasExplosion = new TextureAtlas("explosion.pack");
+
         gamecam = new OrthographicCamera();
         gamecam.position.x = 320;
         gamecam.position.y = 320;
         gamePort = new FitViewport(MyGdxGame.V_WIDTH, MyGdxGame.V_HEIGHT, gamecam);
+
         hud = new Hud(game.batch);
         maploader = new TmxMapLoader();
+        //cargamos el mapa
         map = maploader.load("map1.tmx");
-        cell = ((TiledMapTileLayer) (map.getLayers().get(0)));
-
         renderer = new OrthogonalTiledMapRenderer(map, 1);
 
+        //carga de la musica del juego
         music = MyGdxGame.manager.get("audio/music/TheSunRises.mp3", Music.class);
         music.setLooping(true);
         music.setVolume(0.3f);
@@ -121,6 +137,10 @@ public class PlayScreen implements Screen {
         return atlas;
     }
 
+    public TextureAtlas getAtlasEx() {
+        return atlasExplosion;
+    }
+
     @Override
     public void show() {
 
@@ -128,13 +148,14 @@ public class PlayScreen implements Screen {
 
     public void handleInput(float dt) {
         if (player != null) {
-            //boolean x = cell.getCell((int) player.getX() * 20 / MyGdxGame.V_WIDTH, (int) player.getY() * 20 / MyGdxGame.V_HEIGHT).getTile().getProperties().containsKey
-            //("blocked");
             float previousPositionX = player.getX();
             float previousPositionY = player.getY();
 
             if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
                 if (player.getX() > 32) {
+                    stateTimer += dt;
+                    region = (TextureRegion) player.getALeft().getKeyFrame(stateTimer);
+                    player.setRegion(region);
                     player.setPosition(player.getX() + (-200 * dt), player.getY());
                     direccion = 2;
                 } else {
@@ -143,6 +164,9 @@ public class PlayScreen implements Screen {
             }
             if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
                 if (player.getX() < 580) {
+                    stateTimer += dt;
+                    region = (TextureRegion) player.getARight().getKeyFrame(stateTimer);
+                    player.setRegion(region);
                     player.setPosition(player.getX() + (+200 * dt), player.getY());
                     direccion = 1;
 
@@ -152,16 +176,21 @@ public class PlayScreen implements Screen {
             }
             if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
                 if (player.getY() < 608) {
+                    stateTimer += dt;
+                    region = (TextureRegion) player.getAUp().getKeyFrame(stateTimer);
+                    player.setRegion(region);
                     player.setPosition(player.getX(), player.getY() + (+200 * dt));
                     direccion = 0;
                 } else {
                     player.setPosition(previousPositionX, previousPositionY);
                 }
 
-
             }
             if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
-                if (player.getY() > 64) {
+                if (player.getY() > 50) {
+                    stateTimer += dt;
+                    region = (TextureRegion) player.getADown().getKeyFrame(stateTimer);
+                    player.setRegion(region);
                     player.setPosition(player.getX(), player.getY() + (-200 * dt));
                     direccion = 3;
                 } else {
@@ -211,14 +240,6 @@ public class PlayScreen implements Screen {
         checkHitsEnemy();
         //REnder game map
         renderer.render();
-        /*if(timeSpawn >=3){
-            int randomNum = 10 + (int)(Math.random() * 500);
-            obtaculos.add(new Enemy( randomNum, 500, direcciones[3] * (float) (Math.PI / 2), enemy));
-            timeSpawn = 0;
-        }
-        else {
-           timeSpawn += delta;
-        }*/
         hud.stage.draw();
         batch.begin();
 
@@ -241,20 +262,33 @@ public class PlayScreen implements Screen {
         }
         for (Bullet b : bulletsList) {
             b.draw(batch);
-            //b.render(batch);
         }
         batch.end();
         for (Bullet b : bulletsList) {
             b.update(Gdx.graphics.getDeltaTime());
         }
         for (Enemy b : obtaculos) {
-            b.update(Gdx.graphics.getDeltaTime());
+
+            for (Map.Entry<String, Player> entry : friendlyPlayers.entrySet()) {
+                float xjugador = player.getX() - b.getX();
+                float yjugador = player.getY() - b.getY();
+                float xOtroJuagador = entry.getValue().getX() - b.getX();
+                float yOtroJuagador = entry.getValue().getY() - b.getY();
+                float hypOtroJugador = (float) sqrt(xOtroJuagador * xOtroJuagador + yOtroJuagador * yOtroJuagador);
+                float hypJugadorPrincipal = (float) sqrt(xjugador * xjugador + yjugador * yjugador);
+                if (hypJugadorPrincipal - hypOtroJugador > 0)
+                    b.update(Gdx.graphics.getDeltaTime(), entry.getValue().getX(), entry.getValue().getY());
+                else if (hypJugadorPrincipal - hypOtroJugador < 0)
+                    b.update(Gdx.graphics.getDeltaTime(), player.getX(), player.getY());
+            }
+
         }
         deleteBullets();
         if (player != null && player.getLife() < 0) {
             game.setScreen(new GameOverScreen(game, hud.getScore()));
             socket.disconnect();
             dispose();
+
         }
     }
 
@@ -296,8 +330,7 @@ public class PlayScreen implements Screen {
             try {
                 data.put("x", player.getX());
                 data.put("y", player.getY());
-                String path = ((FileTextureData) player.getTexture().getTextureData()).getFileHandle().path();
-                data.put("texture", path);
+                data.put("direction", direccion);
                 socket.emit("playerMoved", data);
 
             } catch (JSONException e) {
@@ -374,10 +407,27 @@ public class PlayScreen implements Screen {
                     String playerId = data.getString("id");
                     Double x = data.getDouble("x");
                     Double y = data.getDouble("y");
-                    String texture = data.getString("texture");
+                    int direction = data.getInt("direction");
                     //Texture texutraStep = new Texture(texture);
-                    Gdx.app.log("SocketID", "move: " + texture);
+                    Gdx.app.log("SocketID", "move: " + direction);
                     if (friendlyPlayers.get(playerId) != null) {
+                        stateTimer += Gdx.graphics.getDeltaTime();
+                        if (direction == 0) {
+                            regionPlayers = (TextureRegion) friendlyPlayers.get(playerId).getAUp().getKeyFrame(stateTimer);
+                            friendlyPlayers.get(playerId).setRegion(regionPlayers);
+                        } else if (direction == 1) {
+                            regionPlayers = (TextureRegion) friendlyPlayers.get(playerId).getARight().getKeyFrame(stateTimer);
+                            friendlyPlayers.get(playerId).setRegion(regionPlayers);
+
+                        } else if (direction == 2) {
+                            regionPlayers = (TextureRegion) friendlyPlayers.get(playerId).getALeft().getKeyFrame(stateTimer);
+                            friendlyPlayers.get(playerId).setRegion(regionPlayers);
+
+                        } else {
+                            regionPlayers = (TextureRegion) friendlyPlayers.get(playerId).getADown().getKeyFrame(stateTimer);
+                            friendlyPlayers.get(playerId).setRegion(regionPlayers);
+
+                        }
                         friendlyPlayers.get(playerId).setPosition(x.floatValue(), y.floatValue());
                         Rectangle hitbox = new Rectangle(x.floatValue(), y.floatValue(), 33, 36);
                         friendlyPlayers.get(playerId).setHitbox(hitbox);
@@ -395,8 +445,7 @@ public class PlayScreen implements Screen {
                 try {
                     int x = data.getInt("x");
                     Gdx.app.log("ADD Enemy", "Nuevo Enemigo ");
-                    obtaculos.add(new Enemy((int) x, 500, direcciones[3] * (float) (Math.PI / 2), enemy));
-
+                    obtaculos.add(new Enemy((int) x, 500, direcciones[3] * (float) (Math.PI / 2), enemy,PlayScreen.this));
                 } catch (JSONException e) {
                     Gdx.app.log("SocketID", "Error estableciendo nuevo jugador");
                 }
@@ -444,23 +493,10 @@ public class PlayScreen implements Screen {
         });
     }
 
-    private Array<Rectangle> getTiles(int startX, int startY, int endX, int endY) {
-        TiledMapTileLayer layer = (TiledMapTileLayer) map.getLayers().get(0);
-        Array<Rectangle> rectangles = new Array<Rectangle>();
-        for (int x = startX; x <= endX; x++) {
-            for (int y = startY; y <= endY; y++) {
-                TiledMapTileLayer.Cell cell = layer.getCell(x, y);
-                if (cell != null) {
-                    Rectangle rect = new Rectangle(x * 32, y * 32, 32, 32);
-                    rectangles.add(rect);
-                }
-            }
-        }
-        return rectangles;
-    }
-
     //Chekea si la vala a dado a un enemigo
     public void checkHitsBullets() {
+
+        TextureRegion region;
 
         Iterator<Enemy> iterEnemy = obtaculos.iterator();
         while (iterEnemy.hasNext()) {
@@ -472,8 +508,16 @@ public class PlayScreen implements Screen {
                     if (b.getIdPlayer() == id) {
                         hud.addScore(10);
                     }
+
+                    stateTimer += Gdx.graphics.getDeltaTime();
+                    region = (TextureRegion) enemy.getExplosion().getKeyFrame(stateTimer);
+                    enemy.setRegion(region);
+
                     iterBul.remove();
-                    iterEnemy.remove();
+                    //iterEnemy.remove();
+
+
+
                 }
             }
 
