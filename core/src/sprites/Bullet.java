@@ -12,23 +12,35 @@ import Tools.Colision;
  * Created by cfgs on 11/05/17.
  */
 
-public class Bullet {
-    float a,time;
-    Rectangle hitbox;
-    int speed;
+public class Bullet extends Sprite{
+    private float a,time;
+    private Rectangle hitbox;
+    private int speed;
+    private String idPlayer;
 
-    Texture texture;
+    private Texture texture;
 
-    float x, y;
+    private float x, y;
     Colision rect;
     public boolean remove = false;
+    public Bullet(Texture texture){
+        super(texture);
+    }
 
-    public Bullet (int x,int y ,float angle) {
+    public Bullet (int x,int y ,float angle, Texture texture,String idPlayer) {
         time = 2;
         speed = 300;
         hitbox = new Rectangle(x,y,10,10);
-        texture = new Texture("ataque.png");
+        this.texture = texture;
+        this.idPlayer = idPlayer;
         a = angle;
+    }
+    public String getIdPlayer() {
+        return idPlayer;
+    }
+
+    public void setIdPlayer(String idPlayer) {
+        this.idPlayer = idPlayer;
     }
 
     public Rectangle getHitbox() {
@@ -46,14 +58,18 @@ public class Bullet {
         batch.draw(texture, x, y);
     }
 
-    public boolean isDead(){
+    /*public boolean isDead(){
         if(time<0)
             return true;
-
         return false;
-    }
-    public void draw(SpriteBatch batch){
+    }*/
+    public void draw (SpriteBatch batch){
+
         batch.draw(texture,hitbox.x,hitbox.y,10,10);
     }
+
+    /*public void draw(SpriteBatch batch){
+        batch.draw(texture,hitbox.x,hitbox.y,10,10);
+    }*/
 
 }

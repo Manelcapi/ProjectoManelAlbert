@@ -22,6 +22,7 @@ public class Player extends Sprite{
     public Vector2 previousPosition;
     private TextureRegion ninja1;
     private Rectangle hitbox;
+    private float life = 1;
 
     private Animation playerUp;
     private Animation playerDown;
@@ -43,7 +44,6 @@ public class Player extends Sprite{
         playerDown.setPlayMode(Animation.PlayMode.LOOP);
 
         setRegion(ninja1);
-
     }
 
     public Rectangle getHitbox() {
@@ -54,8 +54,19 @@ public class Player extends Sprite{
         return playerDown;
     }
 
+    public float getLife() {
+        return life;
+    }
+
+    public void setLife(float life) {
+        this.life = life;
+    }
+
     public void setHitbox(Rectangle hitbox) {
         this.hitbox = hitbox;
+    }
+    public boolean hitMe(Rectangle hitbox) {
+        return hitbox.overlaps(hitbox);
     }
 
     public void update(float dt){
@@ -70,7 +81,7 @@ public class Player extends Sprite{
             previousPosition.y = getY();
             return true;
         }
-            return false;
+        return false;
 
     }
 

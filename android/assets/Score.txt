@@ -1,0 +1,3 @@
+Manel  :  0
+mANELCAPI  :  0
+Manel  :  100
