@@ -24,7 +24,7 @@ public class Hud implements Disposable{
     private Viewport viewport;
     private float timeCount ;
     private boolean timeUp;
-    private Integer worldTimer;
+    private static Integer worldTimer;
     private static Integer score;
     private Texture heart;
     private String[] color = {"RED","ORANGE","YELLOW"};
@@ -76,5 +76,9 @@ public class Hud implements Disposable{
     public static Integer getScore() {
         return score;
     }
+    public static Integer getTime() {
+        return worldTimer;
+    }
+
 
 }

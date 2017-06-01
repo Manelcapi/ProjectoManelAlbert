@@ -4,10 +4,12 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -16,6 +18,11 @@ import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Window;
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -210,6 +217,10 @@ public class PlayScreen implements Screen {
                 updateServer(Gdx.graphics.getDeltaTime());
 
             }
+            if(Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)){
+                game.setScreen(new MainMenu(game));
+                socket.disconnect();
+            }
             disparo = false;
         }
     }
@@ -237,6 +248,9 @@ public class PlayScreen implements Screen {
         hud.update(Gdx.graphics.getDeltaTime());
         checkHitsBullets();
         checkHitsEnemy();
+        if (!friendlyPlayers.isEmpty()) {
+            checkHitsWIthFrendy();
+        }
         //REnder game map
         renderer.render();
         hud.stage.draw();
@@ -267,34 +281,35 @@ public class PlayScreen implements Screen {
             b.update(Gdx.graphics.getDeltaTime());
         }
         for (Enemy b : obtaculos) {
-        if(friendlyPlayers.isEmpty()){
-            b.update(Gdx.graphics.getDeltaTime(), player.getX(), player.getY());
-        }else{
+            if (friendlyPlayers.isEmpty()) {
+                b.update(Gdx.graphics.getDeltaTime(), player.getX(), player.getY());
+            } else {
 
-            for (Map.Entry<String, Player> entry : friendlyPlayers.entrySet()) {
-                float xjugador = player.getX() - b.getX();
-                float yjugador = player.getY() - b.getY();
-                float xOtroJuagador = entry.getValue().getX() - b.getX();
-                float yOtroJuagador = entry.getValue().getY() - b.getY();
-                float hypOtroJugador = (float) sqrt(xOtroJuagador * xOtroJuagador + yOtroJuagador * yOtroJuagador);
-                float hypJugadorPrincipal = (float) sqrt(xjugador * xjugador + yjugador * yjugador);
-                if (hypJugadorPrincipal - hypOtroJugador > 0)
-                    b.update(Gdx.graphics.getDeltaTime(), entry.getValue().getX(), entry.getValue().getY());
-                else if (hypJugadorPrincipal - hypOtroJugador < 0)
-                    b.update(Gdx.graphics.getDeltaTime(), player.getX(), player.getY());
+                for (Map.Entry<String, Player> entry : friendlyPlayers.entrySet()) {
+                    float xjugador = player.getX() - b.getX();
+                    float yjugador = player.getY() - b.getY();
+                    float xOtroJuagador = entry.getValue().getX() - b.getX();
+                    float yOtroJuagador = entry.getValue().getY() - b.getY();
+                    float hypOtroJugador = (float) sqrt(xOtroJuagador * xOtroJuagador + yOtroJuagador * yOtroJuagador);
+                    float hypJugadorPrincipal = (float) sqrt(xjugador * xjugador + yjugador * yjugador);
+                    if (hypJugadorPrincipal - hypOtroJugador > 0)
+                        b.update(Gdx.graphics.getDeltaTime(), entry.getValue().getX(), entry.getValue().getY());
+                    else if (hypJugadorPrincipal - hypOtroJugador < 0)
+                        b.update(Gdx.graphics.getDeltaTime(), player.getX(), player.getY());
+                }
             }
-        }
 
         }
         deleteBullets();
         if (player != null && player.getLife() < 0) {
             music.stop();
-            game.setScreen(new GameOverScreen(game, hud.getScore()));
+            game.setScreen(new GameOverScreen(game, hud.getScore(),hud.getTime()));
             socket.disconnect();
             dispose();
 
         }
     }
+
 
     @Override
     public void resize(int width, int height) {
@@ -448,8 +463,9 @@ public class PlayScreen implements Screen {
                 JSONObject data = (JSONObject) args[0];
                 try {
                     int x = data.getInt("x");
+                    int y = data.getInt("y");
                     Gdx.app.log("ADD Enemy", "Nuevo Enemigo ");
-                    obtaculos.add(new Enemy((int) x, 500, direcciones[3] * (float) (Math.PI / 2), enemy,PlayScreen.this));
+                    obtaculos.add(new Enemy((int) x, (int) y, direcciones[3] * (float) (Math.PI / 2), enemy));
                 } catch (JSONException e) {
                     Gdx.app.log("SocketID", "Error estableciendo nuevo jugador");
                 }
@@ -512,27 +528,14 @@ public class PlayScreen implements Screen {
                     if (b.getIdPlayer() == id) {
                         hud.addScore(10);
                     }
-                    int i=0;
-                    for (i = 0; i < 6; i++){
-                        stateTimer += Gdx.graphics.getDeltaTime();
-                        region = (TextureRegion) enemy.getExplosion().getKeyFrame(stateTimer);
-                        enemy.setRegion(region);
-                    }
-
-
                     iterBul.remove();
                     iterEnemy.remove();
-
-
-
                 }
             }
 
         }
     }
-
     public void checkHitsEnemy() {
-
         Iterator<Enemy> iterEnemy = obtaculos.iterator();
         while (iterEnemy.hasNext()) {
             Enemy enemy = iterEnemy.next();
@@ -542,6 +545,19 @@ public class PlayScreen implements Screen {
                 life = player.getLife();
                 iterEnemy.remove();
                 Gdx.app.log("TOCADO", "-vida");
+            }
+        }
+    }
+
+    private void checkHitsWIthFrendy() {
+        Iterator<Enemy> iterEnemy = obtaculos.iterator();
+        while (iterEnemy.hasNext()) {
+            Enemy enemy = iterEnemy.next();
+            for (Map.Entry<String, Player> entry : friendlyPlayers.entrySet()) {
+                Rectangle hitboxPlayerFrendly = new Rectangle(entry.getValue().getX(), entry.getValue().getY(), 33, 36);
+                if (hitboxPlayerFrendly.overlaps(enemy.getHitbox())) {
+                    iterEnemy.remove();
+                }
             }
         }
     }

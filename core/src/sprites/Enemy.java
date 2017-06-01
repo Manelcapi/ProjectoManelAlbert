@@ -34,24 +34,12 @@ public class Enemy extends Sprite{
         super(texture);
     }
 
-    public Enemy (int x, int y , float angle, Texture texture, PlayScreen screen) {
-        super(screen.getAtlasEx().findRegion("Ex0"));
+    public Enemy (int x, int y , float angle, Texture texture) {
         this.texture = texture;
         time = 2;
         speed = 1;
         hitbox = new Rectangle(x,y,30,30);
         a = angle;
-        Array<TextureRegion> frames = new Array<TextureRegion>();
-
-        int i = 0;
-        //Animacion de explosion
-        for (i = 0;i < 6; i++) {
-            frames.add(new TextureRegion(screen.getAtlasEx().getRegions().get(i)));
-        }
-        explosion = new Animation(0.1f, frames);
-        //explosion.setPlayMode(Animation.PlayMode.LOOP);
-        frames.clear();
-
     }
 
     public Animation getExplosion(){
@@ -85,7 +73,6 @@ public class Enemy extends Sprite{
         return false;
     }*/
     public void draw (SpriteBatch batch){
-        super.draw(batch);
         batch.draw(texture,hitbox.x,hitbox.y,30,30);
     }
 

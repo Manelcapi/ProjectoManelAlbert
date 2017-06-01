@@ -21,11 +21,13 @@ public class GameOverScreen implements Screen{
     private Viewport viewport;
     private Stage stage;
     private int score;
+    private int time;
 
     private MyGdxGame game;
-    public GameOverScreen (MyGdxGame game, int score){
+    public GameOverScreen (MyGdxGame game, int score, int time){
         this.game = game;
         this.score = score;
+        this.time = time;
         viewport = new FillViewport(MyGdxGame.V_WIDTH,MyGdxGame.V_HEIGHT , new OrthographicCamera());
         stage = new Stage(viewport , game.batch);
 
@@ -54,7 +56,7 @@ public class GameOverScreen implements Screen{
     @Override
     public void render(float delta) {
         if(Gdx.input.justTouched()){
-            game.setScreen(new AddPuntiacion(game,score));
+            game.setScreen(new AddPuntiacion(game,score,time));
             //game.setScreen(new PlayScreen(game));
             //dispose();
         }

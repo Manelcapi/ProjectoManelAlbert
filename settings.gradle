@@ -1,1 +1,1 @@
-include 'desktop', 'android', 'ios', 'html', 'core'
+include 'desktop', 'android', 'ios', 'html', 'core', ':mysql-connector-java-5.1.40-bin', ':mysql-connector-java-5.1.9'

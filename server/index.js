@@ -47,12 +47,7 @@ io.on('connection', function(socket){
     	        }
     	    }
     	});
-    	var interval = setInterval(function(){
-              var variableX = Math.floor((Math.random() * 500) + 40);
-              console.log("enemySpawn: "+ variableX);
-              socket.emit('addEnemy', {x : variableX});
-              }, 2000);
-
+    var interval = setInterval(sendEnemySpan, 300);
 	socket.on('disconnect', function(){
 		console.log("Jugador Desconectado");
 		socket.broadcast.emit('playerDisconnected',{id : socket.id});
@@ -70,6 +65,12 @@ function player(id, x, y){
 	this.id = id;
 	this.x = x;
 	this.y = y;
+}
+function sendEnemySpan() {
+    var variableY = Math.floor((Math.random() * 600) + 40);
+    var variableX = Math.floor((Math.random() * 600) + 40);
+    console.log("Enemigo spawneado");
+    io.emit('addEnemy', { x: variableX,y: variableY});
 }
 function bullet(id, x, y ,direction){
 	this.id = id;

@@ -4,20 +4,20 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.mygdx.game.MyGdxGame;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URL;
+import java.net.MalformedURLException;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+
+import Connection.ConnectionBD;
+
 
 /**
  * Created by cfgs on 30/05/17.
@@ -30,11 +30,12 @@ public class Puntuacion implements Screen {
     private String linea;
     private BitmapFont font;
 
-    public Puntuacion (MyGdxGame game) {
+    public Puntuacion(MyGdxGame game) {
         this.game = game;
         font = new BitmapFont();
         batch = new SpriteBatch();
     }
+
     @Override
     public void show() {
 
@@ -44,31 +45,40 @@ public class Puntuacion implements Screen {
     public void render(float delta) {
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        File archivo = new File("Score.txt");
-        FileReader fr = null;
         batch.begin();
-        font.draw(batch,"PUNTUACIONES",320-12,500);
+        String index = "Top 10 Puntuaciones";
+        GlyphLayout layout1 = new GlyphLayout(font, index);
+        float fontA = (MyGdxGame.V_WIDTH / 2) + (- layout1.width) / 2;
+        font.draw(batch, index, fontA, 500);
         font.setColor(Color.WHITE);
 
         try {
-            URL url = new URL("http://192.168.2.248/score.txt");
-            BufferedReader in = new BufferedReader(new InputStreamReader(
-                    url.openStream()));
-            int x = 0;
-            while ((linea = in.readLine()) != null) {
-                font.draw(batch,linea,(MyGdxGame.V_HEIGHT/2),(MyGdxGame.V_WIDTH/2)-x);
-                x -= 30;
+            Connection conexion = ConnectionBD.getConnection();
+            Statement sentencia = conexion.createStatement();
+            String sql = "SELECT * FROM puntuaciones order by puntuacion desc,tiempo desc";
+            ResultSet resultat = sentencia.executeQuery(sql);
+            int i =0;
+            int y = 1;
+            while (y < 11 && resultat.next()) {
+                String nombre = resultat.getString(1);
+                int puntuacion = resultat.getInt(2);
+                int time = resultat.getInt(3);
+
+                String puntos = y+".- Nombre: "+nombre + " - Puntuacion: " + puntuacion+" -Tiempo: "+time;
+                GlyphLayout layout = new GlyphLayout(font, puntos);
+                float fontX = (MyGdxGame.V_WIDTH / 2) + (- layout.width) / 2;
+                float fontY = 470 -i + ( - layout.height) / 2;
+                font.draw(batch, puntos, fontX, fontY);
+                i = i +30;
+                y++;
             }
-            in.close();
-
-        batch.end();
-
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
-        if(Gdx.input.justTouched()){
+        batch.end();
+
+
+        if (Gdx.input.justTouched()) {
             game.setScreen(new MainMenu(game));
         }
     }
