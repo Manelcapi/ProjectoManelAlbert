@@ -34,8 +34,12 @@ public class AddPuntiacion implements Input.TextInputListener,Screen {
 
     @Override
     public void input(String text) {
+        try {
             addPuntuacion(text);
-            fin = true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        fin = true;
     }
 
     @Override
@@ -57,7 +61,7 @@ public class AddPuntiacion implements Input.TextInputListener,Screen {
             game.setScreen(new MainMenu(game));
         }
     }
-    public void addPuntuacion(String text) {
+    public void addPuntuacion(String text) throws SQLException {
         try {
             Connection conect = ConnectionBD.getConnection();
             Statement sentencia = conect.createStatement();
@@ -66,7 +70,11 @@ public class AddPuntiacion implements Input.TextInputListener,Screen {
             sentencia.executeUpdate(sql);
             conect.close();
         }catch (SQLIntegrityConstraintViolationException e2) {
-            System.out.println("DUplicado");
+            String sql = "Update puntuaciones set puntuacion="+score+", tiempo= '"+time+"' where nombre = '"+text+"'";
+            Connection conect = ConnectionBD.getConnection();
+            Statement sentencia = conect.createStatement();
+            sentencia.executeUpdate(sql);
+            conect.close();
         }catch (SQLException e1) {
 
             e1.printStackTrace();

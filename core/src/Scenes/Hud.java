@@ -26,7 +26,6 @@ public class Hud implements Disposable{
     private boolean timeUp;
     private static Integer worldTimer;
     private static Integer score;
-    private Texture heart;
     private String[] color = {"RED","ORANGE","YELLOW"};
     Label countdownLabel;
     static Label scoreLabel;
@@ -40,7 +39,6 @@ public class Hud implements Disposable{
         Table table = new Table();
         table.top();
         table.setFillParent(true);
-        heart = new Texture("heart.png");
         countdownLabel = new Label(String.format("%03d", worldTimer), new Label.LabelStyle(new BitmapFont(), Color.WHITE));
         scoreLabel = new Label(String.format("%06d", score), new Label.LabelStyle(new BitmapFont(), Color.WHITE));
 

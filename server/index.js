@@ -47,7 +47,7 @@ io.on('connection', function(socket){
     	        }
     	    }
     	});
-    var interval = setInterval(sendEnemySpan, 300);
+    var interval = setInterval(sendEnemySpan, 3000);
 	socket.on('disconnect', function(){
 		console.log("Jugador Desconectado");
 		socket.broadcast.emit('playerDisconnected',{id : socket.id});
