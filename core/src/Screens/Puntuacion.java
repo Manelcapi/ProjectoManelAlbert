@@ -9,8 +9,6 @@ import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.mygdx.game.MyGdxGame;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -54,7 +52,7 @@ public class Puntuacion implements Screen {
 
         try {
             Connection conexion = ConnectionBD.getConnection();
-            Statement sentencia = conexion.createStatement();
+             Statement sentencia = conexion.createStatement();
             String sql = "SELECT * FROM puntuaciones order by puntuacion desc,tiempo desc";
             ResultSet resultat = sentencia.executeQuery(sql);
             int i =0;
