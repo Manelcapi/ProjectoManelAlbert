@@ -208,6 +208,7 @@ public class PlayScreen implements Screen {
             }
             if(Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)){
                 game.setScreen(new MainMenu(game));
+                music.stop();
                 socket.disconnect();
             }
             disparo = false;
