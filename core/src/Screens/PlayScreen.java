@@ -4,12 +4,10 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -18,11 +16,6 @@ import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.scenes.scene2d.ui.Window;
-import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -61,7 +54,6 @@ public class PlayScreen implements Screen {
     private float timePassed = 0;
 
     private Music music;
-    private Music shootsound;
     private OrthographicCamera gamecam;
     private Viewport gamePort;
     private Hud hud;
@@ -209,9 +201,6 @@ public class PlayScreen implements Screen {
                 Gdx.app.log("X DISPARO", "DISPARO: " + player.getX());
                 Gdx.app.log("Y DISPARO", "DISPARO: " + player.getY());
                 bulletsList.add(new Bullet((int) player.getX(), (int) player.getY(), direcciones[direccion] * (float) (Math.PI / 2), bullet, id));
-                shootsound = MyGdxGame.manager.get("audio/efects/Shoot.mp3", Music.class);
-                shootsound.setVolume(0.3f);
-                shootsound.play();
                 disparo = true;
                 //UPDATESERVER PARA ENVIAR EL DISPARO A LOS DEMAS CLIENTES
                 updateServer(Gdx.graphics.getDeltaTime());
@@ -501,9 +490,6 @@ public class PlayScreen implements Screen {
                     Gdx.app.log("SocketID", "shoot : " + direction + " posx; " + x + " posy: " + y);
                     if (friendlyPlayers.get(playerId) != null) {
                         bulletsList.add(new Bullet((int) x, (int) y, direcciones[direction] * (float) (Math.PI / 2), bullet, playerId));
-                        music = MyGdxGame.manager.get("audio/efects/Shoot.mp3", Music.class);
-                        music.setVolume(0.3f);
-                        music.play();
                     }
 
                 } catch (JSONException e) {
